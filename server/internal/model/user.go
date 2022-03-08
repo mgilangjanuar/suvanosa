@@ -11,5 +11,5 @@ type User struct {
 	VerificationCode   *uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()" json:"verification_code"`
 	RefreshToken       *uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4()" json:"refresh_token"`
 	ResetPasswordToken *uuid.UUID `gorm:"type:uuid;default:null" json:"reset_password_token"`
-	Databases          []Database `gorm:"foreignKey:UserID"`
+	Databases          []Database `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"-"`
 }

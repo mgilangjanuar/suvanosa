@@ -198,8 +198,8 @@ func refreshToken(c *gin.Context) {
 		return
 	}
 
-	newUUID := uuid.New()
-	users[0].RefreshToken = &newUUID
+	token := uuid.New()
+	users[0].RefreshToken = &token
 	if err := model.DB.Save(&users[0]).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

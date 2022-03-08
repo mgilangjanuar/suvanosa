@@ -108,6 +108,7 @@ func changeEmail(c *gin.Context) {
 		return
 	}
 
+	// TODO: Send code to email
 	fmt.Println(code)
 
 	c.SetCookie("access_token", "", 0, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)

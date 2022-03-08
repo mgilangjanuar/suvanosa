@@ -20,6 +20,7 @@ func Req(method string, url string, body map[string]interface{}, headers map[str
 			return err
 		}
 		req = request
+		req.Header.Add("Content-Type", "application/json")
 	} else {
 		request, err := http.NewRequest(method, url, nil)
 		if err != nil {

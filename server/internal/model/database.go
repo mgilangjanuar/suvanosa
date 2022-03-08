@@ -8,6 +8,5 @@ type Database struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	UserID      uuid.UUID `json:"user_id"`
-	Forms       []Form    `gorm:"foreignKey:DatabaseID"`
-	User        User
+	Forms       []Form    `gorm:"foreignKey:DatabaseID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"-"`
 }

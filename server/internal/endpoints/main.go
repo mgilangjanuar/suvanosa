@@ -19,5 +19,9 @@ func Aggregate(r *gin.Engine) {
 		{
 			User(user)
 		}
+		database := v1.Group("/databases")
+		{
+			Database(database)
+		}
 	}
 }

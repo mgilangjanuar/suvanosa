@@ -7,6 +7,7 @@ type Form struct {
 	Name       string    `gorm:"notNull" json:"name"`
 	Label      string    `json:"label"`
 	Help       string    `json:"help"`
+	Order      int       `gorm:"default:0" json:"order"`
+	Edited     bool      `gorm:"default:false" json:"edited"`
 	DatabaseID uuid.UUID `json:"database_id"`
-	Database   Database
 }
