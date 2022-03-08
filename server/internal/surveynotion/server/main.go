@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 
-	"surveynotion/pkg/endpoints"
+	"surveynotion/internal/surveynotion/endpoints"
 )
 
 func Run(port string) {

@@ -11,10 +11,10 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 
-	"surveynotion/pkg/middleware"
-	"surveynotion/pkg/model"
+	"surveynotion/internal/surveynotion/middleware"
+	"surveynotion/internal/surveynotion/model"
+	"surveynotion/internal/surveynotion/util"
 	"surveynotion/pkg/service"
-	"surveynotion/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

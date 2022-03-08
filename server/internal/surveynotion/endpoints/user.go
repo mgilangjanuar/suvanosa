@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"surveynotion/pkg/middleware"
-	"surveynotion/pkg/model"
+	"surveynotion/internal/surveynotion/middleware"
+	"surveynotion/internal/surveynotion/model"
+	"surveynotion/internal/surveynotion/util"
 	"surveynotion/pkg/service"
-	"surveynotion/pkg/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
