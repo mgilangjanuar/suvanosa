@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"surveynotion/internal/surveynotion/middleware"
-	"surveynotion/internal/surveynotion/model"
-	"surveynotion/internal/surveynotion/util"
+	"surveynotion/internal/middleware"
+	"surveynotion/internal/model"
+	"surveynotion/internal/util"
 	"surveynotion/pkg/service"
 
 	"github.com/gin-gonic/gin"

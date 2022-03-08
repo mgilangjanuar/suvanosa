@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"surveynotion/internal/surveynotion/model"
-	"surveynotion/internal/surveynotion/util"
+	"surveynotion/internal/model"
+	"surveynotion/internal/util"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
