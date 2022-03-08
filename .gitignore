@@ -1,0 +1,10 @@
+.DS_Store
+.vscode
+
+.env
+
+tmp
+vendor
+
+node_modules
+build
