@@ -1,14 +1,12 @@
 package endpoints
 
 import (
-	"encoding/json"
 	"net/http"
 	"surveynotion/internal/middleware"
 	"surveynotion/internal/model"
 	"surveynotion/pkg/service"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/datatypes"
 )
 
 type Database struct{}
@@ -95,27 +93,11 @@ func (d Database) save(c *gin.Context) {
 	}
 
 	for k, v := range result.Properties {
-		value := v.(map[string]interface{})
-
 		forms := []model.Form{}
 		model.DB.Where("name = ? AND database_id = ?", k, db.ID).Find(&forms)
 
 		if len(forms) == 0 {
-			var optionsJson datatypes.JSON
-			if value["type"].(string) == "select" {
-				json, _ := json.Marshal(value["select"].(map[string]interface{})["options"])
-				optionsJson = datatypes.JSON([]byte(json))
-			}
-
-			form := &model.Form{
-				Name:       k,
-				FormID:     value["id"].(string),
-				Type:       value["type"].(string),
-				Label:      value["name"].(string),
-				Options:    optionsJson,
-				DatabaseID: db.ID,
-			}
-			model.DB.Create(&form)
+			model.DB.Create(model.DB.Create(BuildForm(k, v, db.ID)))
 		}
 	}
 

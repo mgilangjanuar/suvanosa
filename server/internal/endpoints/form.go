@@ -96,29 +96,16 @@ func (f Form) add(c *gin.Context) {
 		return
 	}
 
-	var form *model.Form
 	for k, v := range result.Properties {
 		fmt.Println(k, *data.Name)
 		if k == *data.Name {
-			value := v.(map[string]interface{})
-			var optionsJson datatypes.JSON
-			if value["type"].(string) == "select" {
-				json, _ := json.Marshal(value["select"].(map[string]interface{})["options"])
-				optionsJson = datatypes.JSON([]byte(json))
-			}
+			form := BuildForm(k, v, databases[0].ID)
+			model.DB.Create(form)
 
-			form = &model.Form{
-				Name:       k,
-				FormID:     value["id"].(string),
-				Type:       value["type"].(string),
-				Label:      value["name"].(string),
-				Options:    optionsJson,
-				DatabaseID: databases[0].ID,
-			}
-			model.DB.Create(&form)
+			c.JSON(http.StatusOK, gin.H{"form": form})
+			return
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{"form": form})
 }
 
 func (f Form) update(c *gin.Context) {
@@ -219,4 +206,22 @@ func (f Form) delete(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"form": obj})
+}
+
+func BuildForm(k string, v interface{}, databaseID uuid.UUID) *model.Form {
+	value := v.(map[string]interface{})
+	var optionsJson datatypes.JSON
+	if value["type"].(string) == "select" {
+		json, _ := json.Marshal(value["select"].(map[string]interface{})["options"])
+		optionsJson = datatypes.JSON([]byte(json))
+	}
+
+	return &model.Form{
+		Name:       k,
+		FormID:     value["id"].(string),
+		Type:       value["type"].(string),
+		Label:      value["name"].(string),
+		Options:    optionsJson,
+		DatabaseID: databaseID,
+	}
 }
