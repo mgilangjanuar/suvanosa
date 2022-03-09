@@ -11,7 +11,7 @@ import (
 
 func Database(r *gin.RouterGroup) {
 	r.POST("/search", middleware.JWT, search)
-	r.POST("/save", middleware.JWT, save)
+	r.POST("", middleware.JWT, save)
 	r.GET("", middleware.JWT, list)
 	r.DELETE("/:id", middleware.JWT, delete)
 	r.PATCH("/:id", middleware.JWT, update)
@@ -82,7 +82,7 @@ func save(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{})
+	c.JSON(http.StatusOK, gin.H{"database": db})
 }
 
 func list(c *gin.Context) {
