@@ -14,17 +14,19 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func User(r *gin.RouterGroup) {
+type User struct{}
+
+func (u User) New(r *gin.RouterGroup) {
 	me := r.Group("/me", middleware.JWT)
 	{
-		me.GET("", getMe)
-		me.PATCH("/changePassword", changePassword)
-		me.PATCH("/changeEmail", changeEmail)
-		me.PATCH("/changeKey", changeKey)
+		me.GET("", u.getMe)
+		me.PATCH("/changePassword", u.changePassword)
+		me.PATCH("/changeEmail", u.changeEmail)
+		me.PATCH("/changeKey", u.changeKey)
 	}
 }
 
-func getMe(c *gin.Context) {
+func (u User) getMe(c *gin.Context) {
 	user := c.Value("user").(model.User)
 
 	userData := map[string]interface{}{
@@ -38,7 +40,7 @@ func getMe(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H(userData))
 }
 
-func changePassword(c *gin.Context) {
+func (u User) changePassword(c *gin.Context) {
 	var data struct {
 		OldPassword *string `json:"old_password"`
 		NewPassword *string `json:"new_password"`
@@ -79,7 +81,7 @@ func changePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func changeEmail(c *gin.Context) {
+func (u User) changeEmail(c *gin.Context) {
 	var data struct {
 		Email *string `json:"email"`
 	}
@@ -117,7 +119,7 @@ func changeEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{})
 }
 
-func changeKey(c *gin.Context) {
+func (u User) changeKey(c *gin.Context) {
 	var data struct {
 		Key *string `json:"key"`
 	}

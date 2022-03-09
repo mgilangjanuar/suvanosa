@@ -20,16 +20,18 @@ import (
 	"github.com/google/uuid"
 )
 
-func Auth(r *gin.RouterGroup) {
-	r.POST("/register", register)
-	r.POST("/verify", verify)
-	r.POST("/login", login)
-	r.POST("/refreshToken", refreshToken)
-	r.POST("/forgotPassword", forgotPassword)
-	r.POST("/resetPassword", resetPassword)
+type Auth struct{}
+
+func (a Auth) New(r *gin.RouterGroup) {
+	r.POST("/register", a.register)
+	r.POST("/verify", a.verify)
+	r.POST("/login", a.login)
+	r.POST("/refreshToken", a.refreshToken)
+	r.POST("/forgotPassword", a.forgotPassword)
+	r.POST("/resetPassword", a.resetPassword)
 }
 
-func register(c *gin.Context) {
+func (a Auth) register(c *gin.Context) {
 	var data struct {
 		Email    *string `json:"email"`
 		Password *string `json:"password"`
@@ -88,7 +90,7 @@ func register(c *gin.Context) {
 	// TODO: send email with user.VerificationCode
 }
 
-func verify(c *gin.Context) {
+func (a Auth) verify(c *gin.Context) {
 	var data struct {
 		Code *string `json:"code"`
 	}
@@ -120,7 +122,7 @@ func verify(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{})
 }
 
-func login(c *gin.Context) {
+func (a Auth) login(c *gin.Context) {
 	var data struct {
 		Email    *string `json:"email"`
 		Password *string `json:"password"`
@@ -154,7 +156,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	userData, tokens, err := _generateUserData(users[0])
+	userData, tokens, err := a._generateUserData(users[0])
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -171,7 +173,7 @@ func login(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H(userData))
 }
 
-func refreshToken(c *gin.Context) {
+func (a Auth) refreshToken(c *gin.Context) {
 	var data struct {
 		Token *string `json:"refresh_token"`
 	}
@@ -205,7 +207,7 @@ func refreshToken(c *gin.Context) {
 		return
 	}
 
-	userData, tokens, err := _generateUserData(users[0])
+	userData, tokens, err := a._generateUserData(users[0])
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -222,7 +224,7 @@ func refreshToken(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H(userData))
 }
 
-func forgotPassword(c *gin.Context) {
+func (a Auth) forgotPassword(c *gin.Context) {
 	var data struct {
 		Email *string `json:"email"`
 	}
@@ -258,7 +260,7 @@ func forgotPassword(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{})
 }
 
-func resetPassword(c *gin.Context) {
+func (a Auth) resetPassword(c *gin.Context) {
 	var data struct {
 		Code     *string `json:"code"`
 		Password *string `json:"password"`
@@ -298,7 +300,7 @@ func resetPassword(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{})
 }
 
-func _generateUserData(user model.User) (map[string]interface{}, map[string]interface{}, error) {
+func (a Auth) _generateUserData(user model.User) (map[string]interface{}, map[string]interface{}, error) {
 	expires := time.Now().Add(util.JWT_EXPIRATION_TIME).Unix()
 
 	token := jwt.NewWithClaims(util.JWT_SIGN_METHOD, &middleware.Claims{

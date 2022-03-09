@@ -9,19 +9,23 @@ func Aggregate(r *gin.Engine) {
 	{
 		ping := v1.Group("/ping")
 		{
-			Ping(ping)
+			Ping{}.New(ping)
 		}
 		auth := v1.Group("/auth")
 		{
-			Auth(auth)
+			Auth{}.New(auth)
 		}
 		user := v1.Group("/users")
 		{
-			User(user)
+			User{}.New(user)
 		}
 		database := v1.Group("/databases")
 		{
-			Database(database)
+			Database{}.New(database)
+		}
+		form := v1.Group("/forms")
+		{
+			Form{}.New(form)
 		}
 	}
 }

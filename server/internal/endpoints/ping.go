@@ -6,7 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Ping(r *gin.RouterGroup) {
+type Ping struct{}
+
+func (p Ping) New(r *gin.RouterGroup) {
 	r.GET("", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "pong"})
 	})

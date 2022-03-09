@@ -1,23 +1,28 @@
 package endpoints
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"surveynotion/internal/middleware"
 	"surveynotion/internal/model"
 	"surveynotion/pkg/service"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 )
 
-func Database(r *gin.RouterGroup) {
-	r.POST("/search", middleware.JWT, search)
-	r.POST("", middleware.JWT, save)
-	r.GET("", middleware.JWT, list)
-	r.DELETE("/:id", middleware.JWT, delete)
-	r.PATCH("/:id", middleware.JWT, update)
+type Database struct{}
+
+func (d Database) New(r *gin.RouterGroup) {
+	r.POST("/search", middleware.JWT, d.search)
+	r.POST("", middleware.JWT, d.save)
+	r.GET("", middleware.JWT, d.list)
+	r.DELETE("/:id", middleware.JWT, d.delete)
+	r.PATCH("/:id", middleware.JWT, d.update)
 }
 
-func search(c *gin.Context) {
+func (d Database) search(c *gin.Context) {
 	var data struct {
 		Query *string `json:"query"`
 	}
@@ -49,7 +54,7 @@ func search(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"results": resultDatabases})
 }
 
-func save(c *gin.Context) {
+func (d Database) save(c *gin.Context) {
 	var data struct {
 		ID *string `json:"id"`
 	}
@@ -82,10 +87,30 @@ func save(c *gin.Context) {
 		return
 	}
 
+	for k, v := range result.Properties {
+		value := v.(map[string]interface{})
+		var optionsJson datatypes.JSON
+		if value["type"].(string) == "select" {
+			options := value["select"].(map[string]interface{})["options"]
+			json, _ := json.Marshal(options)
+			optionsJson = datatypes.JSON([]byte(json))
+			fmt.Println(optionsJson)
+		}
+		form := &model.Form{
+			Name:       k,
+			FormID:     value["id"].(string),
+			Type:       value["type"].(string),
+			Label:      value["name"].(string),
+			Options:    optionsJson,
+			DatabaseID: db.ID,
+		}
+		model.DB.Create(&form)
+	}
+
 	c.JSON(http.StatusOK, gin.H{"database": db})
 }
 
-func list(c *gin.Context) {
+func (d Database) list(c *gin.Context) {
 	// limit := c.Query("limit")
 	// offset := c.Query("offset")
 	user := c.Value("user").(model.User)
@@ -96,7 +121,7 @@ func list(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"databases": databases})
 }
 
-func delete(c *gin.Context) {
+func (d Database) delete(c *gin.Context) {
 	id := c.Param("id")
 
 	user := c.Value("user").(model.User)
@@ -118,7 +143,7 @@ func delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"database": obj})
 }
 
-func update(c *gin.Context) {
+func (d Database) update(c *gin.Context) {
 	id := c.Param("id")
 
 	var data struct {
