@@ -1,5 +1,7 @@
 package service
 
+import "fmt"
+
 type Notion struct {
 	Token string
 }
@@ -93,6 +95,8 @@ func (n Notion) Search(query string) (SeachResponse, error) {
 }
 
 func (n Notion) GetDatabase(id string) (ResultResponse, error) {
+	fmt.Println("https://api.notion.com/v1/databases/" + id)
+
 	var responseObject ResultResponse
 	err := n.req("GET", "https://api.notion.com/v1/databases/"+id, nil, &responseObject)
 	return responseObject, err

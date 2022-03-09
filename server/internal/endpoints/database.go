@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"surveynotion/internal/middleware"
 	"surveynotion/internal/model"
@@ -76,6 +75,14 @@ func (d Database) save(c *gin.Context) {
 		return
 	}
 
+	dbs := []model.Database{}
+	model.DB.Where("user_id = ? AND db_id = ?", user.ID, result.ID).Find(&dbs)
+
+	if len(dbs) > 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "database already exists"})
+		return
+	}
+
 	db := &model.Database{
 		DB_ID:  result.ID,
 		Title:  result.Title[0].PlainText,
@@ -89,22 +96,27 @@ func (d Database) save(c *gin.Context) {
 
 	for k, v := range result.Properties {
 		value := v.(map[string]interface{})
-		var optionsJson datatypes.JSON
-		if value["type"].(string) == "select" {
-			options := value["select"].(map[string]interface{})["options"]
-			json, _ := json.Marshal(options)
-			optionsJson = datatypes.JSON([]byte(json))
-			fmt.Println(optionsJson)
+
+		forms := []model.Form{}
+		model.DB.Where("name = ? AND database_id = ?", k, db.ID).Find(&forms)
+
+		if len(forms) == 0 {
+			var optionsJson datatypes.JSON
+			if value["type"].(string) == "select" {
+				json, _ := json.Marshal(value["select"].(map[string]interface{})["options"])
+				optionsJson = datatypes.JSON([]byte(json))
+			}
+
+			form := &model.Form{
+				Name:       k,
+				FormID:     value["id"].(string),
+				Type:       value["type"].(string),
+				Label:      value["name"].(string),
+				Options:    optionsJson,
+				DatabaseID: db.ID,
+			}
+			model.DB.Create(&form)
 		}
-		form := &model.Form{
-			Name:       k,
-			FormID:     value["id"].(string),
-			Type:       value["type"].(string),
-			Label:      value["name"].(string),
-			Options:    optionsJson,
-			DatabaseID: db.ID,
-		}
-		model.DB.Create(&form)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"database": db})
