@@ -18,6 +18,7 @@ type Form struct{}
 func (f Form) New(r *gin.RouterGroup) {
 	r.GET("", middleware.JWT, f.list)
 	r.GET("/public/:databaseID", f.public)
+	r.POST("/public/:databaseID", f.submit)
 	r.POST("", middleware.JWT, f.add)
 	r.PATCH("/:id", middleware.JWT, f.update)
 	r.DELETE("/:id", middleware.JWT, f.delete)
@@ -53,7 +54,41 @@ func (f Form) public(c *gin.Context) {
 	forms := []model.Form{}
 	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Find(&forms)
 
+	if len(forms) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "database not found"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{"forms": forms})
+}
+
+func (f Form) submit(c *gin.Context) {
+	databaseID := c.Param("databaseID")
+	var data struct {
+		Forms *[]map[string]string `json:"forms"`
+	}
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if data.Forms == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "forms is required"})
+		return
+	}
+
+	forms := []model.Form{}
+	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Find(&forms)
+
+	if len(forms) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "database not found"})
+		return
+	}
+
+	// TODO: build payload and send to notion
+
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (f Form) add(c *gin.Context) {

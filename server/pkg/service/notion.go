@@ -1,7 +1,5 @@
 package service
 
-import "fmt"
-
 type Notion struct {
 	Token string
 }
@@ -57,7 +55,8 @@ type ResultResponse struct {
 		Type   string `json:"type"`
 		PageID string `json:"page_id"`
 	} `json:"parent"`
-	URL string `json:"url"`
+	Archived bool   `json:"archived"`
+	URL      string `json:"url"`
 }
 
 type SeachResponse struct {
@@ -95,9 +94,19 @@ func (n Notion) Search(query string) (SeachResponse, error) {
 }
 
 func (n Notion) GetDatabase(id string) (ResultResponse, error) {
-	fmt.Println("https://api.notion.com/v1/databases/" + id)
-
 	var responseObject ResultResponse
 	err := n.req("GET", "https://api.notion.com/v1/databases/"+id, nil, &responseObject)
+	return responseObject, err
+}
+
+func (n Notion) CreatePage(databaseID string, properties map[string]interface{}) (ResultResponse, error) {
+	var responseObject ResultResponse
+	body := map[string]interface{}{
+		"parent": map[string]string{
+			"database_id": databaseID,
+		},
+		"properties": properties,
+	}
+	err := n.req("POST", "https://api.notion.com/v1/pages", body, &responseObject)
 	return responseObject, err
 }
