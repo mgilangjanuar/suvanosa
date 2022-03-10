@@ -9,7 +9,7 @@ import (
 )
 
 func Run() (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_DSN")), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URI")), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
