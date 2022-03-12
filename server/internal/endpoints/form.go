@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"surveynotion/internal/middleware"
 	"surveynotion/internal/model"
 	"surveynotion/pkg/service"
@@ -17,11 +18,11 @@ type Form struct{}
 
 func (f Form) New(r *gin.RouterGroup) {
 	r.GET("", middleware.JWT, f.list)
-	r.GET("/public/:databaseID", f.public)
-	r.POST("/public/:databaseID", f.submit)
 	r.POST("", middleware.JWT, f.add)
 	r.PATCH("/:id", middleware.JWT, f.update)
 	r.DELETE("/:id", middleware.JWT, f.delete)
+	r.GET("/public/:databaseID", f.public)
+	r.POST("/public/:databaseID", f.submit)
 }
 
 func (f Form) list(c *gin.Context) {
@@ -65,7 +66,7 @@ func (f Form) public(c *gin.Context) {
 func (f Form) submit(c *gin.Context) {
 	databaseID := c.Param("databaseID")
 	var data struct {
-		Forms *[]map[string]string `json:"forms"`
+		Forms *map[string]interface{} `json:"forms"`
 	}
 
 	if err := c.ShouldBindJSON(&data); err != nil {
@@ -78,15 +79,26 @@ func (f Form) submit(c *gin.Context) {
 		return
 	}
 
-	forms := []model.Form{}
-	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Find(&forms)
+	databases := []model.Database{}
+	model.DB.Select([]string{"id", "user_id", "db_id"}).Where("id = ?", uuid.Must(uuid.Parse(databaseID))).Find(&databases)
 
-	if len(forms) == 0 {
+	if len(databases) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "database not found"})
 		return
 	}
 
-	// TODO: build payload and send to notion
+	users := []model.User{}
+	model.DB.Select("key").Where("id = ?", databases[0].UserID).Find(&users)
+
+	forms := []model.Form{}
+	model.DB.Where("database_id = ?", databases[0].ID).Find(&forms)
+
+	payload := ParseToProperties(*data.Forms, forms)
+	_, err := service.Notion{Token: users[0].Key}.CreatePage(databases[0].DB_ID, payload)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{})
 }
@@ -259,4 +271,75 @@ func BuildForm(k string, v interface{}, databaseID uuid.UUID) *model.Form {
 		Options:    optionsJson,
 		DatabaseID: databaseID,
 	}
+}
+
+func ParseToProperties(data map[string]interface{}, forms []model.Form) map[string]interface{} {
+	result := map[string]interface{}{}
+	for _, form := range forms {
+		if val, ok := data[form.Name]; ok {
+			if form.Type == "title" || form.Type == "rich_text" {
+				result[form.Name] = map[string][]interface{}{
+					form.Type: {
+						map[string]interface{}{
+							"type": "text",
+							"text": map[string]string{
+								"content": val.(string),
+							},
+						},
+					},
+				}
+			} else if form.Type == "number" {
+				result[form.Name] = map[string]int{
+					"number": val.(int),
+				}
+			} else if form.Type == "select" {
+				result[form.Name] = map[string]interface{}{
+					"select": map[string]string{
+						"name": val.(string),
+					},
+				}
+			} else if form.Type == "multi_select" {
+				result[form.Name] = map[string]interface{}{
+					"multi_select": []map[string]string{
+						{"name": val.(string)},
+					},
+				}
+			} else if form.Type == "date" {
+				if form.DateType == "range" {
+					dates := strings.Split(val.(string), " - ")
+					result[form.Name] = map[string]interface{}{
+						"date": map[string]string{
+							"start": dates[0],
+							"end":   dates[1],
+						},
+					}
+				} else {
+					result[form.Name] = map[string]interface{}{
+						"date": map[string]string{
+							"start": val.(string),
+						},
+					}
+				}
+			} else if form.Type == "files" {
+				result[form.Name] = map[string]interface{}{
+					"files": []interface{}{
+						map[string]string{
+							"type":     "external",
+							"name":     val.(string),
+							"external": val.(string),
+						},
+					},
+				}
+			} else if form.Type == "checkbox" {
+				result[form.Name] = map[string]bool{
+					"checkbox": val.(bool),
+				}
+			} else if form.Type == "url" || form.Type == "email" || form.Type == "phone_number" {
+				result[form.Name] = map[string]string{
+					form.Type: val.(string),
+				}
+			}
+		}
+	}
+	return result
 }
