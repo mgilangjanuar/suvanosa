@@ -3,7 +3,6 @@ package endpoints
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -312,7 +311,7 @@ func (a Auth) _generateUserData(user model.User) (map[string]interface{}, map[st
 		Email: user.Email,
 	})
 
-	signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
+	signedToken, err := token.SignedString([]byte(util.JWT_SECRET))
 	if err != nil {
 		return nil, nil, err
 	}
