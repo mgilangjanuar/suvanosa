@@ -1,4 +1,4 @@
-module surveynotion
+module suvanosa
 
 go 1.17
 

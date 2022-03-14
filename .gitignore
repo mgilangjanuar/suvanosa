@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+.vs
 
 .env
 
@@ -8,3 +9,4 @@ vendor
 
 node_modules
 build
+.vercel

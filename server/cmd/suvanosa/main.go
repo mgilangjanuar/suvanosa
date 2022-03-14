@@ -5,8 +5,8 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"surveynotion/internal/model"
-	"surveynotion/internal/server"
+	"suvanosa/internal/model"
+	"suvanosa/internal/server"
 )
 
 func main() {

@@ -10,10 +10,10 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 
-	"surveynotion/internal/middleware"
-	"surveynotion/internal/model"
-	"surveynotion/internal/util"
-	"surveynotion/pkg/service"
+	"suvanosa/internal/middleware"
+	"suvanosa/internal/model"
+	"suvanosa/internal/util"
+	"suvanosa/pkg/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,6 +23,7 @@ type Auth struct{}
 
 func (a Auth) New(r *gin.RouterGroup) {
 	r.POST("/register", a.register)
+	r.POST("/resendVerification", a.resendVerification)
 	r.POST("/verify", a.verify)
 	r.POST("/login", a.login)
 	r.POST("/refreshToken", a.refreshToken)
@@ -86,6 +87,40 @@ func (a Auth) register(c *gin.Context) {
 	c.JSON(http.StatusAccepted, gin.H{})
 
 	fmt.Println(user.VerificationCode)
+	// TODO: send email with user.VerificationCode
+}
+
+func (a Auth) resendVerification(c *gin.Context) {
+	var data struct {
+		Email *string `json:"email"`
+	}
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if data.Email == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "email is required"})
+		return
+	}
+
+	var users []model.User
+	model.DB.Where("email = ?", data.Email).Find(&users)
+
+	if len(users) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		return
+	}
+
+	if users[0].VerificationCode == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "user already verified"})
+		return
+	}
+
+	c.JSON(http.StatusAccepted, gin.H{})
+
+	fmt.Println(users[0].VerificationCode)
 	// TODO: send email with user.VerificationCode
 }
 

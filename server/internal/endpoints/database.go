@@ -2,9 +2,9 @@ package endpoints
 
 import (
 	"net/http"
-	"surveynotion/internal/middleware"
-	"surveynotion/internal/model"
-	"surveynotion/pkg/service"
+	"suvanosa/internal/middleware"
+	"suvanosa/internal/model"
+	"suvanosa/pkg/service"
 
 	"github.com/gin-gonic/gin"
 )

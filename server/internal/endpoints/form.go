@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"surveynotion/internal/middleware"
-	"surveynotion/internal/model"
-	"surveynotion/pkg/service"
+	"suvanosa/internal/middleware"
+	"suvanosa/internal/model"
+	"suvanosa/pkg/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
