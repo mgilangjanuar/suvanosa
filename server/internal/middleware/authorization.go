@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"suvanosa/internal/model"
 	"suvanosa/internal/util"
@@ -50,7 +49,7 @@ func JWT(c *gin.Context) {
 		} else if method != util.JWT_SIGN_METHOD {
 			return nil, fmt.Errorf("unexpected signing method: %v", method)
 		}
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		return []byte(util.JWT_SECRET), nil
 	})
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)

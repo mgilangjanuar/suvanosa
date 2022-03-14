@@ -147,8 +147,14 @@ func (u User) changeKey(c *gin.Context) {
 
 	user := c.Value("user").(model.User)
 
+	encryptedKey, err := util.Encrypt(*data.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	user.Integration = bot.Name
-	user.Key = *data.Key
+	user.Key = *encryptedKey
 	if err := model.DB.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

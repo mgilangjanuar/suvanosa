@@ -7,6 +7,7 @@ import (
 	"strings"
 	"suvanosa/internal/middleware"
 	"suvanosa/internal/model"
+	"suvanosa/internal/util"
 	"suvanosa/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -94,7 +95,14 @@ func (f Form) submit(c *gin.Context) {
 	model.DB.Where("database_id = ?", databases[0].ID).Find(&forms)
 
 	payload := ParseToProperties(*data.Forms, forms)
-	_, err := service.Notion{Token: users[0].Key}.CreatePage(databases[0].DB_ID, payload)
+
+	key, err := util.Decrypt(users[0].Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	_, err = service.Notion{Token: *key}.CreatePage(databases[0].DB_ID, payload)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -137,7 +145,13 @@ func (f Form) add(c *gin.Context) {
 		return
 	}
 
-	result, err := service.Notion{Token: user.Key}.GetDatabase(databases[0].DB_ID)
+	key, err := util.Decrypt(user.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := service.Notion{Token: *key}.GetDatabase(databases[0].DB_ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

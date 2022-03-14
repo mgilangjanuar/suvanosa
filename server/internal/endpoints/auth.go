@@ -72,11 +72,17 @@ func (a Auth) register(c *gin.Context) {
 		return
 	}
 
+	encryptedKey, err := util.Encrypt(*data.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	user := &model.User{
 		Email:       *data.Email,
 		Password:    string(password),
 		Integration: bot.Name,
-		Key:         *data.Key,
+		Key:         *encryptedKey,
 	}
 
 	if err := model.DB.Create(&user).Error; err != nil {

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"suvanosa/internal/middleware"
 	"suvanosa/internal/model"
+	"suvanosa/internal/util"
 	"suvanosa/pkg/service"
 
 	"github.com/gin-gonic/gin"
@@ -35,7 +36,13 @@ func (d Database) search(c *gin.Context) {
 	}
 
 	user := c.Value("user").(model.User)
-	result, err := service.Notion{Token: user.Key}.Search(*data.Query)
+	key, err := util.Decrypt(user.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := service.Notion{Token: *key}.Search(*data.Query)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -67,7 +74,13 @@ func (d Database) save(c *gin.Context) {
 	}
 
 	user := c.Value("user").(model.User)
-	result, err := service.Notion{Token: user.Key}.GetDatabase(*data.ID)
+
+	key, err := util.Decrypt(user.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	result, err := service.Notion{Token: *key}.GetDatabase(*data.ID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return

@@ -7,7 +7,7 @@ import (
 	"github.com/golang-jwt/jwt"
 )
 
-var APPLICATION_NAME = "SurveyNotion"
+var APPLICATION_NAME = "Suvanosa"
 var WEB_BASE_URL = os.Getenv("WEB_BASE_URL")
 
 var JWT_SECRET = os.Getenv("JWT_SECRET")
