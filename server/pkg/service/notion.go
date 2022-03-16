@@ -1,9 +1,16 @@
 package service
 
-import "os"
+import (
+	"encoding/base64"
+	"os"
+)
 
 type Notion struct {
-	Token string
+	Token     string
+	BasicAuth *struct {
+		Username string
+		Password string
+	}
 }
 
 type NotionMeResponse struct {
@@ -97,6 +104,9 @@ func (n Notion) req(method string, url string, body map[string]interface{}, resp
 	}
 	if n.Token != "" {
 		headers["Authorization"] = "Bearer " + n.Token
+	}
+	if n.BasicAuth != nil {
+		headers["Authorization"] = "Basic " + base64.StdEncoding.EncodeToString([]byte(n.BasicAuth.Username+":"+n.BasicAuth.Password))
 	}
 	return Req(method, url, body, headers, responseObject)
 }
