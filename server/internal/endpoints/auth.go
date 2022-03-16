@@ -1,7 +1,6 @@
 package endpoints
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -92,8 +91,7 @@ func (a Auth) register(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, gin.H{})
 
-	fmt.Println(user.VerificationCode)
-	// TODO: send email with user.VerificationCode
+	service.Email{}.SendVerification(*data.Email, user.VerificationCode.String())
 }
 
 func (a Auth) resendVerification(c *gin.Context) {
@@ -126,8 +124,7 @@ func (a Auth) resendVerification(c *gin.Context) {
 
 	c.JSON(http.StatusAccepted, gin.H{})
 
-	fmt.Println(users[0].VerificationCode)
-	// TODO: send email with user.VerificationCode
+	service.Email{}.SendVerification(users[0].Email, users[0].VerificationCode.String())
 }
 
 func (a Auth) verify(c *gin.Context) {
@@ -294,8 +291,7 @@ func (a Auth) forgotPassword(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(users[0].ResetPasswordToken)
-	// TODO: send email with user.VerificationCode
+	service.Email{}.SendVerification(users[0].Email, users[0].ResetPasswordToken.String())
 
 	c.JSON(http.StatusAccepted, gin.H{})
 }

@@ -2,11 +2,10 @@ package main
 
 import (
 	"os"
-
-	"github.com/joho/godotenv"
-
 	"suvanosa/internal/model"
 	"suvanosa/internal/server"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {

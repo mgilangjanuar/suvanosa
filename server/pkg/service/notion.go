@@ -4,7 +4,7 @@ type Notion struct {
 	Token string
 }
 
-type MeResponse struct {
+type NotionMeResponse struct {
 	Object       string `json:"object"`
 	ID           string `json:"id"`
 	Name         string `json:"name"`
@@ -18,7 +18,7 @@ type MeResponse struct {
 	} `json:"bot"`
 }
 
-type ResultResponse struct {
+type NotionResultResponse struct {
 	Object      string `json:"object"`
 	ID          string `json:"id"`
 	Cover       string `json:"cover"`
@@ -59,12 +59,12 @@ type ResultResponse struct {
 	URL      string `json:"url"`
 }
 
-type SeachResponse struct {
-	Object     string           `json:"object"`
-	NextCursor string           `json:"next_cursor"`
-	HasMore    bool             `json:"has_more"`
-	Type       string           `json:"type"`
-	Results    []ResultResponse `json:"results"`
+type NotionSeachResponse struct {
+	Object     string                 `json:"object"`
+	NextCursor string                 `json:"next_cursor"`
+	HasMore    bool                   `json:"has_more"`
+	Type       string                 `json:"type"`
+	Results    []NotionResultResponse `json:"results"`
 }
 
 func (n Notion) req(method string, url string, body map[string]interface{}, responseObject interface{}) error {
@@ -74,14 +74,14 @@ func (n Notion) req(method string, url string, body map[string]interface{}, resp
 	}, responseObject)
 }
 
-func (n Notion) GetMe() (MeResponse, error) {
-	var responseObject MeResponse
+func (n Notion) GetMe() (NotionMeResponse, error) {
+	var responseObject NotionMeResponse
 	err := n.req("GET", "https://api.notion.com/v1/users/me", nil, &responseObject)
 	return responseObject, err
 }
 
-func (n Notion) Search(query string) (SeachResponse, error) {
-	var responseObject SeachResponse
+func (n Notion) Search(query string) (NotionSeachResponse, error) {
+	var responseObject NotionSeachResponse
 	body := map[string]interface{}{
 		"query": query,
 		"sort": map[string]string{
@@ -93,14 +93,14 @@ func (n Notion) Search(query string) (SeachResponse, error) {
 	return responseObject, err
 }
 
-func (n Notion) GetDatabase(id string) (ResultResponse, error) {
-	var responseObject ResultResponse
+func (n Notion) GetDatabase(id string) (NotionResultResponse, error) {
+	var responseObject NotionResultResponse
 	err := n.req("GET", "https://api.notion.com/v1/databases/"+id, nil, &responseObject)
 	return responseObject, err
 }
 
-func (n Notion) CreatePage(databaseID string, properties map[string]interface{}) (ResultResponse, error) {
-	var responseObject ResultResponse
+func (n Notion) CreatePage(databaseID string, properties map[string]interface{}) (NotionResultResponse, error) {
+	var responseObject NotionResultResponse
 	body := map[string]interface{}{
 		"parent": map[string]string{
 			"database_id": databaseID,
