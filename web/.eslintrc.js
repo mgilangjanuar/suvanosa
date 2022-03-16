@@ -78,7 +78,7 @@ module.exports = {
     'no-trailing-spaces': 'error',
     'no-var': 'error',
     'prefer-const': 'error',
-    'spaced-comment': ['error', 'always', { 'markers': ['/'] }],
+    'spaced-comment': 'error',
     'object-curly-spacing': ['error', 'always'],
     'space-in-parens': ['error', 'never'],
     'array-bracket-spacing': ['error', 'never'],

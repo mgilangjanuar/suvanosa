@@ -1,5 +1,7 @@
 package service
 
+import "os"
+
 type Notion struct {
 	Token string
 }
@@ -16,6 +18,28 @@ type NotionMeResponse struct {
 			Workspace bool   `json:"workspace"`
 		} `json:"owner"`
 	} `json:"bot"`
+}
+
+type NotionTokenResponse struct {
+	AccessToken   string `json:"access_token"`
+	TokenType     string `json:"token_type"`
+	BotID         string `json:"bot_id"`
+	WorkspaceName string `json:"workspace_name"`
+	WorkspaceIcon string `json:"workspace_icon"`
+	WorkspaceID   string `json:"workspace_id"`
+	Owner         struct {
+		OwnerType string `json:"type"`
+		User      struct {
+			Object       string `json:"object"`
+			ID           string `json:"id"`
+			Name         string `json:"name"`
+			AvatarUrl    string `json:"avatar_url"`
+			ResponseType string `json:"type"`
+			Person       struct {
+				Email string `json:"email"`
+			} `json:"person"`
+		} `json:"user"`
+	} `json:"owner"`
 }
 
 type NotionResultResponse struct {
@@ -68,10 +92,24 @@ type NotionSeachResponse struct {
 }
 
 func (n Notion) req(method string, url string, body map[string]interface{}, responseObject interface{}) error {
-	return Req(method, url, body, map[string]string{
+	headers := map[string]string{
 		"Notion-Version": "2022-02-22",
-		"Authorization":  "Bearer " + n.Token,
-	}, responseObject)
+	}
+	if n.Token != "" {
+		headers["Authorization"] = "Bearer " + n.Token
+	}
+	return Req(method, url, body, headers, responseObject)
+}
+
+func (n Notion) RequestToken(code string) (NotionTokenResponse, error) {
+	var responseObject NotionTokenResponse
+	body := map[string]interface{}{
+		"grant_type":   "authorization_code",
+		"redirect_uri": os.Getenv("NOTION_REDIRECT_URL"),
+		"code":         code,
+	}
+	err := n.req("POST", "https://api.notion.com/v1/oauth/token", body, &responseObject)
+	return responseObject, err
 }
 
 func (n Notion) GetMe() (NotionMeResponse, error) {

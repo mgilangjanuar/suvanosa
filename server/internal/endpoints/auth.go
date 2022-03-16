@@ -1,7 +1,10 @@
 package endpoints
 
 import (
+	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +24,11 @@ import (
 type Auth struct{}
 
 func (a Auth) New(r *gin.RouterGroup) {
+	notion := r.Group("/notion")
+	{
+		notion.GET("/url", a.authURL)
+		notion.POST("/token", a.requestToken)
+	}
 	r.POST("/register", a.register)
 	r.POST("/resendVerification", a.resendVerification)
 	r.POST("/verify", a.verify)
@@ -28,6 +36,70 @@ func (a Auth) New(r *gin.RouterGroup) {
 	r.POST("/refreshToken", a.refreshToken)
 	r.POST("/forgotPassword", a.forgotPassword)
 	r.POST("/resetPassword", a.resetPassword)
+}
+
+func (a Auth) authURL(c *gin.Context) {
+	clientID := os.Getenv("NOTION_CLIENT_ID")
+	redirect := url.QueryEscape(os.Getenv("NOTION_REDIRECT_URL"))
+	url := fmt.Sprintf("https://api.notion.com/v1/oauth/authorize?owner=user&client_id=%s&redirect_uri=%s&response_type=code", clientID, redirect)
+	c.JSON(http.StatusAccepted, gin.H{"url": url})
+}
+
+func (a Auth) requestToken(c *gin.Context) {
+	var data struct {
+		Code *string `json:"code"`
+	}
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if data.Code == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "code is required"})
+		return
+	}
+
+	result, err := service.Notion{}.RequestToken(*data.Code)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var users []model.User
+	model.DB.Where("key = ?", result.AccessToken).Find(&users)
+
+	var user model.User
+	if len(users) > 0 {
+		user = users[0]
+	} else {
+		passGenerated := result.AccessToken + ":" + result.Owner.User.Person.Email
+		password, err := bcrypt.GenerateFromPassword([]byte(passGenerated), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		user = model.User{
+			Email:       result.Owner.User.Person.Email,
+			Password:    string(password),
+			Integration: result.WorkspaceName,
+			Key:         result.AccessToken,
+		}
+
+		if err := model.DB.Create(&user).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	userData, err := a._getUserDataAndSetCookies(user, c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H(userData))
 }
 
 func (a Auth) register(c *gin.Context) {
@@ -193,18 +265,10 @@ func (a Auth) login(c *gin.Context) {
 		return
 	}
 
-	userData, tokens, err := a._generateUserData(users[0])
+	userData, err := a._getUserDataAndSetCookies(users[0], c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}
-
-	for k, v := range tokens {
-		var duration int = int(util.JWT_EXPIRATION_TIME.Seconds())
-		if k == "refresh_token" {
-			duration = int(util.REFRESH_TOKEN_EXPIRATION_TIME.Seconds())
-		}
-		c.SetCookie(k, v.(string), duration, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
 	}
 
 	c.JSON(http.StatusOK, gin.H(userData))
@@ -244,18 +308,10 @@ func (a Auth) refreshToken(c *gin.Context) {
 		return
 	}
 
-	userData, tokens, err := a._generateUserData(users[0])
+	userData, err := a._getUserDataAndSetCookies(users[0], c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
-	}
-
-	for k, v := range tokens {
-		var duration int = int(util.JWT_EXPIRATION_TIME.Seconds())
-		if k == "refresh_token" {
-			duration = int(util.REFRESH_TOKEN_EXPIRATION_TIME.Seconds())
-		}
-		c.SetCookie(k, v.(string), duration, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
 	}
 
 	c.JSON(http.StatusOK, gin.H(userData))
@@ -371,4 +427,20 @@ func (a Auth) _generateUserData(user model.User) (map[string]interface{}, map[st
 		userData[k] = v
 	}
 	return userData, tokens, nil
+}
+
+func (a Auth) _getUserDataAndSetCookies(user model.User, c *gin.Context) (map[string]interface{}, error) {
+	userData, tokens, err := a._generateUserData(user)
+	if err != nil {
+		return nil, err
+	}
+
+	for k, v := range tokens {
+		var duration int = int(util.JWT_EXPIRATION_TIME.Seconds())
+		if k == "refresh_token" {
+			duration = int(util.REFRESH_TOKEN_EXPIRATION_TIME.Seconds())
+		}
+		c.SetCookie(k, v.(string), duration, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
+	}
+	return userData, nil
 }
