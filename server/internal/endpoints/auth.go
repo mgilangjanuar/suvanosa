@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"suvanosa/internal/middleware"
@@ -25,6 +26,7 @@ type Auth struct{}
 func (a Auth) New(r *gin.RouterGroup) {
 	r.GET("/url", a.authURL)
 	r.POST("/token", a.requestToken)
+	r.POST("/refreshToken", a.refreshToken)
 }
 
 func (a Auth) authURL(c *gin.Context) {
@@ -107,6 +109,49 @@ func (a Auth) requestToken(c *gin.Context) {
 	}
 
 	userData, err := a._getUserDataAndSetCookies(user, c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H(userData))
+}
+
+func (a Auth) refreshToken(c *gin.Context) {
+	var data struct {
+		Token *string `json:"refresh_token"`
+	}
+
+	if err := c.ShouldBindJSON(&data); err != nil {
+		token, err := c.Request.Cookie("refresh_token")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		data.Token = &token.Value
+	}
+
+	if data.Token == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "refresh token is required"})
+		return
+	}
+
+	var users []model.User
+	model.DB.Where("refresh_token = ?", data.Token).Find(&users)
+
+	if len(users) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not exists"})
+		return
+	}
+
+	token := uuid.New()
+	users[0].RefreshToken = &token
+	if err := model.DB.Save(&users[0]).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	userData, err := a._getUserDataAndSetCookies(users[0], c)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
