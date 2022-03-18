@@ -27,6 +27,7 @@ func (a Auth) New(r *gin.RouterGroup) {
 	r.GET("/url", a.authURL)
 	r.POST("/token", a.requestToken)
 	r.POST("/refreshToken", a.refreshToken)
+	r.POST("/logout", a.logout)
 }
 
 func (a Auth) authURL(c *gin.Context) {
@@ -158,6 +159,13 @@ func (a Auth) refreshToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H(userData))
+}
+
+func (a Auth) logout(c *gin.Context) {
+	c.SetCookie("access_token", "", 0, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
+	c.SetCookie("expires_at", "", 0, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
+	c.SetCookie("refresh_token", "", 0, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (a Auth) _generateUserData(user model.User) (map[string]interface{}, map[string]interface{}, error) {
