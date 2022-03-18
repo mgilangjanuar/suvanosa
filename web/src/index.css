@@ -13,3 +13,7 @@ body {
 .ant-layout, footer, .ant-layout-footer {
   background: #fff;
 }
+
+.container {
+  padding: 24px 20px;
+}

@@ -1,26 +1,17 @@
-import { Button, Layout } from 'antd'
+import { Layout } from 'antd'
 import { FC, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import useSWR from 'swr'
-import { fetcher, req } from '../../utils/Fetcher'
+import { req } from '../../utils/Fetcher'
 
 const Dashboard: FC = () => {
   const navigate = useNavigate()
-  const { error } = useSWR('/users/me', fetcher)
 
   useEffect(() => {
-    if (error) {
-      navigate('/')
-    }
-  }, [error])
+    req.get('/users/me')
+      .catch(() => navigate('/'))
+  }, [])
 
-  const logout = () => {
-    req.post('/auth/logout')
-    window.location.reload()
-  }
-
-  return <Layout.Content>
-    <Button danger onClick={logout}>Logout</Button>
+  return <Layout.Content className="container">
   </Layout.Content>
 }
 
