@@ -24,20 +24,20 @@ import (
 type Auth struct{}
 
 func (a Auth) New(r *gin.RouterGroup) {
-	r.GET("/url", a.authURL)
-	r.POST("/token", a.requestToken)
+	r.GET("/url", a.url)
+	r.POST("/token", a.token)
 	r.POST("/refreshToken", a.refreshToken)
 	r.POST("/logout", a.logout)
 }
 
-func (a Auth) authURL(c *gin.Context) {
+func (a Auth) url(c *gin.Context) {
 	clientID := os.Getenv("NOTION_CLIENT_ID")
 	redirect := url.QueryEscape(os.Getenv("NOTION_REDIRECT_URL"))
 	url := fmt.Sprintf("https://api.notion.com/v1/oauth/authorize?owner=user&client_id=%s&redirect_uri=%s&response_type=code", clientID, redirect)
-	c.JSON(http.StatusAccepted, gin.H{"url": url})
+	c.JSON(http.StatusOK, gin.H{"url": url})
 }
 
-func (a Auth) requestToken(c *gin.Context) {
+func (a Auth) token(c *gin.Context) {
 	var data struct {
 		Code *string `json:"code"`
 	}
