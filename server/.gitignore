@@ -4,6 +4,6 @@
 
 .env
 
-node_modules
-build
-.vercel
+bin
+tmp
+vendor
