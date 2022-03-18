@@ -2,6 +2,7 @@
 .vscode
 .vs
 
+.git
 .env
 
 bin
