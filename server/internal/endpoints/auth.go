@@ -129,6 +129,10 @@ func (a Auth) refreshToken(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		if token.Value == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "refresh token is required"})
+			return
+		}
 		data.Token = &token.Value
 	}
 

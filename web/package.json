@@ -32,6 +32,7 @@
     "workbox-streams": "^5.1.4"
   },
   "scripts": {
+    "dev": "HTTPS=true SSL_CRT_FILE=~/localhost.pem SSL_KEY_FILE=~/localhost-key.pem react-scripts start",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
