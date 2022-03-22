@@ -2,13 +2,12 @@ import { MenuOutlined } from '@ant-design/icons'
 import { Button, Layout, Menu } from 'antd'
 import { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
-import useSWR from 'swr'
-import { fetcher, req } from '../utils/Fetcher'
+import { useLogin } from '../hooks/useLogin'
+import { req } from '../utils/Fetcher'
 
 const Header: FC = () => {
   const navigate = useNavigate()
-  const { data, error } = useSWR('/users/me', fetcher)
-  const { data: respUrl } = useSWR(error ? '/auth/url' : null, fetcher)
+  const { user, url } = useLogin()
 
   const logout = () => {
     req.post('/auth/logout')
@@ -20,7 +19,7 @@ const Header: FC = () => {
       style={{ background: '#ffffff', position: 'relative', display: 'flex', justifyContent: 'right' }}>
       <Menu.Item onClick={() => navigate('/')} key="">Home</Menu.Item>
       <Menu.Item key="action-right" style={{ float: 'right' }}>
-        {data?.user ? <Button danger onClick={logout}>Logout</Button> : <Button href={respUrl?.url}>Dashboard</Button> }
+        {user ? <Button danger onClick={logout}>Logout</Button> : <Button href={url}>Login</Button> }
       </Menu.Item>
     </Menu>
   </Layout.Header>
