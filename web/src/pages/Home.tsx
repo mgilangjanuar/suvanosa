@@ -15,7 +15,9 @@ const Home: FC = () => {
           Start to create beautiful surveys with Notion. What you have to do is create a database page in your Notion workspace, and voila! Your survey is ready to share with your audience.
         </Typography.Paragraph>
         <Typography.Paragraph style={{ marginTop: '40px' }}>
-          <Button size="large" type="primary" onClick={() => window.open(user ? '/dashboard' : url, '_self')}>Create a Survey</Button>
+          <Button size="large" type="primary" onClick={() => window.open(user ? '/dashboard' : url, '_self')}>
+            {user ? 'Go to Dashboard' : 'Create a Survey'}
+          </Button>
         </Typography.Paragraph>
       </Col>
     </Row>

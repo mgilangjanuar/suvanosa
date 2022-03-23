@@ -54,7 +54,7 @@ func (f Form) public(c *gin.Context) {
 	databaseID := c.Param("databaseID")
 
 	forms := []model.Form{}
-	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Order("order").Find(&forms)
+	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Order("forms.order").Find(&forms)
 
 	if len(forms) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "database not found"})

@@ -77,7 +77,7 @@ type NotionResultResponse struct {
 			Underline     bool   `json:"underline"`
 			Code          bool   `json:"code"`
 			Color         string `json:"color"`
-		} `json:"annotaations"`
+		} `json:"annotations"`
 		PlainText string `json:"plain_text"`
 		Href      string `json:"href"`
 	} `json:"title"`

@@ -1,6 +1,7 @@
 package endpoints
 
 import (
+	"encoding/json"
 	"net/http"
 	"suvanosa/internal/middleware"
 	"suvanosa/internal/model"
@@ -8,6 +9,7 @@ import (
 	"suvanosa/pkg/service"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/datatypes"
 )
 
 type Database struct{}
@@ -94,10 +96,15 @@ func (d Database) save(c *gin.Context) {
 		return
 	}
 
+	var realObject datatypes.JSON
+	json, _ := json.Marshal(result)
+	realObject = datatypes.JSON([]byte(json))
+
 	db := &model.Database{
-		DB_ID:  result.ID,
-		Title:  result.Title[0].PlainText,
-		UserID: user.ID,
+		DB_ID:      result.ID,
+		Title:      result.Title[0].PlainText,
+		UserID:     user.ID,
+		RealObject: realObject,
 	}
 
 	if err := model.DB.Create(&db).Error; err != nil {
