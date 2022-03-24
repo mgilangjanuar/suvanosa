@@ -21,6 +21,7 @@ func (f Form) New(r *gin.RouterGroup) {
 	r.GET("", middleware.JWT, f.list)
 	r.POST("", middleware.JWT, f.add)
 	r.PATCH("/:id", middleware.JWT, f.update)
+	r.PATCH("/:id/sync", middleware.JWT, f.sync)
 	r.DELETE("/:id", middleware.JWT, f.delete)
 	r.GET("/public/:databaseID", f.public)
 	r.POST("/public/:databaseID", f.submit)
@@ -167,6 +168,61 @@ func (f Form) add(c *gin.Context) {
 			return
 		}
 	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"error": "properties not found"})
+}
+
+func (f Form) sync(c *gin.Context) {
+	id := c.Param("id")
+
+	forms := []model.Form{}
+	model.DB.Where("id = ?", id).Find(&forms)
+
+	if len(forms) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "form not found"})
+		return
+	}
+
+	user := c.Value("user").(model.User)
+
+	databases := []model.Database{}
+	model.DB.Select([]string{"id", "db_id"}).Where("user_id = ? AND id = ?", user.ID, forms[0].DatabaseID).Find(&databases)
+
+	if len(databases) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "database not found"})
+		return
+	}
+
+	key, err := util.Decrypt(user.Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	result, err := service.Notion{Token: *key}.GetDatabase(databases[0].DB_ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	for k, v := range result.Properties {
+		if k == forms[0].Name {
+			form := BuildForm(k, v, databases[0].ID)
+			forms[0].FormID = form.FormID
+			forms[0].Type = form.Type
+			forms[0].Label = form.Label
+			forms[0].Options = form.Options
+			if err := model.DB.Save(&forms[0]).Error; err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+				return
+			}
+
+			c.JSON(http.StatusOK, gin.H{"form": forms[0]})
+			return
+		}
+	}
+
+	c.JSON(http.StatusBadRequest, gin.H{"error": "properties not found"})
 }
 
 func (f Form) update(c *gin.Context) {

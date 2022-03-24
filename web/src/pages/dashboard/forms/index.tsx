@@ -1,5 +1,5 @@
-import { DeleteOutlined, MenuOutlined, PlusOutlined, SaveOutlined } from '@ant-design/icons'
-import { Button, Card, Col, Drawer, Form, Input, Layout, notification, Popconfirm, Row, Select, Space, Tag, Tooltip, Typography } from 'antd'
+import { DeleteOutlined, MenuOutlined, PlusOutlined, SyncOutlined } from '@ant-design/icons'
+import { Button, Card, Form, Input, Layout, Modal, notification, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
 import { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -12,6 +12,8 @@ const Forms: FC = () => {
   const [form] = useForm()
   const [formDb] = useForm()
   const params = useParams()
+  const [showAddModal, setShowAddModal] = useState<boolean>(false)
+  const [searchFormName, setSearchFormName] = useState<string>()
   const { data: db, error: errorDb } = useSWR(`/databases/${params.id}`, fetcher)
   const { data: forms, error: errorForms } = useSWR(`/forms/public/${params.id}`, fetcher)
 
@@ -89,6 +91,33 @@ const Forms: FC = () => {
     })
   }
 
+  const addForm = async () => {
+    if (searchFormName) {
+      try {
+        const { data } = await req.post('/forms', { database_id: params.id, name: searchFormName })
+        if (!form.getFieldValue('forms').find((f: any) => f.id === data.form.id)) {
+          form.setFieldsValue({
+            forms: [...form.getFieldValue('forms'), data.form]
+          })
+          updateFormsOrder()
+          setShowAddModal(false)
+          setSearchFormName(undefined)
+        } else {
+          notification.error({
+            message: 'Column has been added'
+          })
+        }
+        // notification.success({
+        //   message: 'Added'
+        // })
+      } catch (error) {
+        notification.error({
+          message: 'Not found'
+        })
+      }
+    }
+  }
+
   return <>
     <Layout.Content>
       <Form form={formDb}>
@@ -109,13 +138,13 @@ const Forms: FC = () => {
     <Layout.Content style={{ marginTop: '40px' }}>
       <Form form={form}>
         <Form.List name="forms">
-          {(fields, { add, remove }) => <>
+          {(fields, { remove }) => <>
             <SortableList items={fields.map((field, i) => ({ field, remove, i, form }))} onSortEnd={({ oldIndex, newIndex }: any) => {
               form.setFieldsValue({ forms: arrayMove(form.getFieldValue('forms'), oldIndex, newIndex) })
               updateFormsOrder()
             }} useDragHandle useWindowAsScrollContainer />
             <Form.Item wrapperCol={{ span: 24 }}>
-              <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+              <Button type="dashed" onClick={() => setShowAddModal(true)} block icon={<PlusOutlined />}>
                 Add form item
               </Button>
             </Form.Item>
@@ -123,32 +152,59 @@ const Forms: FC = () => {
         </Form.List>
       </Form>
     </Layout.Content>
+
+    <Modal visible={showAddModal} onCancel={() => setShowAddModal(false)} onOk={() => addForm()} okText="Add" title="Search property">
+      <Form onFinish={addForm}>
+        <Form.Item>
+          <Input placeholder="Input your column name..." value={searchFormName} onChange={e => setSearchFormName(e.target.value)} />
+        </Form.Item>
+      </Form>
+    </Modal>
   </>
 }
 
 const SortableItem = SortableElement(({ value }: any) => {
-  const [showDrawer, setShowDrawer] = useState<boolean>(!value.form.getFieldValue('forms')?.[value.i]?.label)
+  const [syncLoading, setSyncLoading] = useState<boolean>()
+  const [removeLoading, setRemoveLoading] = useState<boolean>()
 
   const remove = async () => {
+    setRemoveLoading(true)
     try {
       await req.delete(`/forms/${value.form.getFieldValue('forms')?.[value.i]?.id}`)
       notification.success({
         message: 'Deleted'
       })
       value.remove(value.field.name)
+      setRemoveLoading(false)
     } catch (error) {
       notification.error({
         message: 'Something error'
       })
+      setRemoveLoading(false)
     }
-    // value.form.submit()
   }
 
-  const save = () => {
-    value.form.submit()
-    const data = value.form.getFieldValue('forms')?.[value.i]
-    if (data?.label && data?.type) {
-      setShowDrawer(false)
+  const sync = async () => {
+    setSyncLoading(true)
+    try {
+      const { data } = await req.patch(`/forms/${value.form.getFieldValue('forms')?.[value.i]?.id}/sync`)
+      value.form.setFieldsValue({
+        forms: value.form.getFieldValue('forms').map((form: any, i: number) => {
+          if (i === value.i) {
+            return data.form
+          }
+          return form
+        })
+      })
+      notification.success({
+        message: 'Synced'
+      })
+      setSyncLoading(false)
+    } catch (error) {
+      notification.error({
+        message: 'Something error'
+      })
+      setSyncLoading(false)
     }
   }
 
@@ -167,6 +223,12 @@ const SortableItem = SortableElement(({ value }: any) => {
     }
   }
 
+  const FormItem: FC<{ form: any }> = ({ form }) => {
+    return <Form.Item>
+      {form.type === 'title' || form.type === 'rich_text' ? <Input /> : <></>}
+    </Form.Item>
+  }
+
   return <Card style={{ margin: '20px 0', position: 'relative', height: '185px' }}>
     <Form.Item>
       <Layout.Content>
@@ -176,38 +238,21 @@ const SortableItem = SortableElement(({ value }: any) => {
             {value.form.getFieldValue('forms')?.[value.i]?.type}
           </Tag>
           <Popconfirm title="Are you sure to delete this?" onConfirm={remove}>
-            <Button type="text" shape="round" danger icon={<DeleteOutlined />}>Remove</Button>
+            <Button loading={removeLoading} size="small" type="text" shape="round" danger icon={<DeleteOutlined />} />
           </Popconfirm>
-          {/* <Button type="text" shape="round" onClick={() => setShowDrawer(true)} icon={<EditOutlined />} /> */}
+          <Button loading={syncLoading} size="small" type="text" shape="round" onClick={() => sync()} icon={<SyncOutlined />} />
         </Space>
       </Layout.Content>
 
       <Layout.Content style={{ marginTop: '20px', position: 'absolute', width: '100%' }}>
-        <Row>
-          <Col>
-            <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-              <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']}>
-                <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." />
-              </Form.Item>
-              {/* <Typography.Title style={{ marginBottom: 0 }} level={5}>{value.form.getFieldValue('forms')?.[value.i]?.label || 'Untitled'}</Typography.Title> */}
-            </div>
-          </Col>
-        </Row>
+        <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']}>
+            <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." />
+          </Form.Item>
+          <FormItem form={value.form.getFieldValue('forms')?.[value.i]} />
+          {/* <Typography.Title style={{ marginBottom: 0 }} level={5}>{value.form.getFieldValue('forms')?.[value.i]?.label || 'Untitled'}</Typography.Title> */}
+        </div>
       </Layout.Content>
-
-      <Drawer title={`Edit ${value.form.getFieldValue('forms')?.[value.i]?.label || 'Untitled'}`} placement="right" closable visible={showDrawer} onClose={() => setShowDrawer(false)}>
-        <Form.Item { ...fieldCol } {...value.field} label="Label" name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']} rules={[{ required: true, message: 'Please input label' }]}>
-          <Input />
-        </Form.Item>
-        <Form.Item style={{ marginTop: '20px' }}>
-          <Space style={{ float: 'right' }}>
-            <Popconfirm title="Are you sure to delete this?" onConfirm={remove}>
-              <Button type="text" shape="round" danger icon={<DeleteOutlined />}>Remove</Button>
-            </Popconfirm>
-            <Button type="text" shape="round" icon={<SaveOutlined />} onClick={save}>Save</Button>
-          </Space>
-        </Form.Item>
-      </Drawer>
     </Form.Item>
   </Card>
 })

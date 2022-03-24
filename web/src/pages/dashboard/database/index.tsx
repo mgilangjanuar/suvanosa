@@ -1,5 +1,5 @@
 import { ArrowRightOutlined, DeleteOutlined } from '@ant-design/icons'
-import { Button, Empty, Layout, Popconfirm, Space, Spin, Typography } from 'antd'
+import { Button, Layout, Popconfirm, Space, Spin, Typography } from 'antd'
 import { FC, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useSWR from 'swr'
