@@ -18,3 +18,8 @@ body {
 .container {
   padding: 24px 20px;
 }
+
+.ant-drawer-content-wrapper {
+  width: 100% !important;
+  max-width: 480px;
+}

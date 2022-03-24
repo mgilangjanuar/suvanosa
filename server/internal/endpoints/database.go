@@ -9,6 +9,7 @@ import (
 	"suvanosa/pkg/service"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/datatypes"
 )
 
@@ -18,6 +19,7 @@ func (d Database) New(r *gin.RouterGroup) {
 	r.POST("/search", middleware.JWT, d.search)
 	r.POST("", middleware.JWT, d.save)
 	r.GET("", middleware.JWT, d.list)
+	r.GET("/:id", d.retrieve)
 	r.DELETE("/:id", middleware.JWT, d.delete)
 	r.PATCH("/:id", middleware.JWT, d.update)
 }
@@ -92,7 +94,7 @@ func (d Database) save(c *gin.Context) {
 	model.DB.Where("user_id = ? AND db_id = ?", user.ID, result.ID).Find(&dbs)
 
 	if len(dbs) > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "database already exists"})
+		c.JSON(http.StatusOK, gin.H{"database": dbs[0]})
 		return
 	}
 
@@ -133,6 +135,15 @@ func (d Database) list(c *gin.Context) {
 	model.DB.Where("user_id = ?", user.ID).Find(&databases)
 
 	c.JSON(http.StatusOK, gin.H{"databases": databases})
+}
+
+func (d Database) retrieve(c *gin.Context) {
+	id := c.Param("id")
+
+	databases := []model.Database{}
+	model.DB.Select([]string{"id, title, description"}).Where("id = ?", uuid.Must(uuid.Parse(id))).Find(&databases)
+
+	c.JSON(http.StatusOK, gin.H{"database": databases[0]})
 }
 
 func (d Database) delete(c *gin.Context) {

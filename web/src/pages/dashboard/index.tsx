@@ -3,7 +3,7 @@ import { Col, Layout, Menu, Row } from 'antd'
 import { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { req } from '../../utils/Fetcher'
-import Forms from '../forms'
+import Forms from './forms'
 import Connect from './connect'
 import Database from './database'
 

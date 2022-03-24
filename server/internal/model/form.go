@@ -15,6 +15,7 @@ type Form struct {
 	Help        string         `json:"help"`
 	Description string         `json:"description"`
 	Order       int            `gorm:"default:0" json:"order"`
+	Required    bool           `gorm:"default:false" json:"required"`
 	Edited      bool           `gorm:"default:false" json:"edited"`
 	Options     datatypes.JSON `gorm:"type:jsonb;default:NULL" json:"options"`
 	DatabaseID  uuid.UUID      `json:"database_id"`

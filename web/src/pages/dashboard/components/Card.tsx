@@ -4,12 +4,13 @@ import { FC, ReactElement } from 'react'
 
 interface Props {
   data: any,
+  name?: string,
   url?: string,
   extra?: ReactElement
 }
 
-const Card: FC<Props> = ({ data, url, extra }) => {
-  return <BaseCard title={data.title[0].plain_text} extra={extra}>
+const Card: FC<Props> = ({ name, data, url, extra }) => {
+  return <BaseCard title={name || data.title[0].plain_text} extra={extra}>
     <BaseCard.Meta description={<>
       <Typography.Paragraph>
         <Typography.Text strong>Properties: </Typography.Text>

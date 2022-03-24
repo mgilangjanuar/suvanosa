@@ -30,17 +30,16 @@ const Database: FC = () => {
     <Layout.Content style={{ marginTop: '40px' }}>
       {!data && !error ? <Spin /> : <>
         {data?.databases?.length ? <>
-          {data?.databases.map((db: any) => <Card data={db.real_object} key={db.id} extra={<Space>
+          {data?.databases.map((db: any) => <Card name={db.title} data={db.real_object} key={db.id} extra={<Space>
             <Popconfirm title="Are you sure?" onConfirm={() => remove(db.id)}>
-              <Button loading={removeLoading} shape="circle" danger type="text" icon={<DeleteOutlined />} />
+              <Button loading={removeLoading} shape="round" danger type="text" icon={<DeleteOutlined />} />
             </Popconfirm>
-            <Button type="text" shape="circle" onClick={() => navigate(`/dashboard/forms/${db.id}`)} icon={<ArrowRightOutlined />} />
+            <Button type="text" shape="round" onClick={() => navigate(`/dashboard/forms/${db.id}`)} icon={<ArrowRightOutlined />} />
           </Space>} url={`${location.origin}/forms/${db.id}`} />)}
         </> : <Space direction="vertical">
           <Typography.Paragraph type="secondary">
             You don't have any database yet. Try to connecting with your database in Notion <a href="/dashboard/connect">here</a>.
           </Typography.Paragraph>
-          <Empty />
         </Space>}
       </>}
     </Layout.Content>

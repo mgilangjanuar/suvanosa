@@ -6,19 +6,15 @@ export function useSearch(search?: string) {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (search) {
-      setLoading(true)
-      req.post('/databases/search', { query: search })
-        .then(({ data }) => {
-          setResults(data?.results ?? [])
-          setLoading(false)
-        })
-        .catch(() => {
-          setLoading(false)
-        })
-    } else {
-      setResults(undefined)
-    }
+    setLoading(true)
+    req.post('/databases/search', { query: search || '' })
+      .then(({ data }) => {
+        setResults(data?.results ?? [])
+        setLoading(false)
+      })
+      .catch(() => {
+        setLoading(false)
+      })
   }, [search])
 
   return { results, loading }

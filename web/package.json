@@ -16,8 +16,10 @@
     "react-dom": "^17.0.2",
     "react-router-dom": "^6.2.2",
     "react-scripts": "5.0.0",
+    "react-sortable-hoc": "^2.0.0",
     "swr": "^1.2.2",
     "typescript": "^4.6.2",
+    "use-debounce": "^7.0.1",
     "web-vitals": "^0.2.4",
     "workbox-background-sync": "^5.1.4",
     "workbox-broadcast-update": "^5.1.4",
@@ -59,6 +61,7 @@
   "devDependencies": {
     "@types/antd": "^1.0.0",
     "@types/axios": "^0.14.0",
-    "@types/react-router-dom": "^5.3.3"
+    "@types/react-router-dom": "^5.3.3",
+    "@types/react-sortable-hoc": "^0.7.1"
   }
 }
