@@ -57,11 +57,6 @@ func (f Form) public(c *gin.Context) {
 	forms := []model.Form{}
 	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Order("forms.order").Find(&forms)
 
-	if len(forms) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"error": "database not found"})
-		return
-	}
-
 	c.JSON(http.StatusOK, gin.H{"forms": forms})
 }
 
@@ -234,6 +229,7 @@ func (f Form) update(c *gin.Context) {
 			Type        *string         `json:"type"`
 			Help        *string         `json:"help"`
 			Description *string         `json:"description"`
+			Required    *bool           `json:"required"`
 			Order       *int            `json:"order"`
 			Options     *datatypes.JSON `json:"options"`
 		} `json:"form"`
@@ -284,6 +280,9 @@ func (f Form) update(c *gin.Context) {
 	}
 	if data.Form.Options != nil {
 		forms[0].Options = *data.Form.Options
+	}
+	if data.Form.Required != nil {
+		forms[0].Required = *data.Form.Required
 	}
 	forms[0].Edited = true
 

@@ -21,9 +21,13 @@ const Card: FC<Props> = ({ name, data, url, extra }) => {
         <Typography.Text>{moment(data.created_time).local().format('lll')}</Typography.Text>
       </Typography.Paragraph>
       <Typography.Paragraph>
-        <Typography.Text strong>URL: </Typography.Text>
-        <Typography.Text><a target="_blank" href={url || data.url}>{url || data.url}</a></Typography.Text>
+        <Typography.Text strong>Database URL: </Typography.Text>
+        <Typography.Text><a target="_blank" href={data.url}>{data.url}</a></Typography.Text>
       </Typography.Paragraph>
+      {url && <Typography.Paragraph>
+        <Typography.Text strong>Form URL: </Typography.Text>
+        <Typography.Text><a target="_blank" href={url}>{url}</a></Typography.Text>
+      </Typography.Paragraph>}
     </>} />
   </BaseCard>
 }

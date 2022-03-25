@@ -19,9 +19,9 @@ func (d Database) New(r *gin.RouterGroup) {
 	r.POST("/search", middleware.JWT, d.search)
 	r.POST("", middleware.JWT, d.save)
 	r.GET("", middleware.JWT, d.list)
-	r.GET("/:id", d.retrieve)
 	r.DELETE("/:id", middleware.JWT, d.delete)
 	r.PATCH("/:id", middleware.JWT, d.update)
+	r.GET("/:id", d.retrieve)
 }
 
 func (d Database) search(c *gin.Context) {
@@ -141,7 +141,37 @@ func (d Database) retrieve(c *gin.Context) {
 	id := c.Param("id")
 
 	databases := []model.Database{}
-	model.DB.Select([]string{"id, title, description"}).Where("id = ?", uuid.Must(uuid.Parse(id))).Find(&databases)
+	model.DB.Select([]string{"id, title, db_id, description, user_id, real_object"}).Where("id = ?", uuid.Must(uuid.Parse(id))).Find(&databases)
+
+	if len(databases) == 0 {
+		c.JSON(http.StatusOK, gin.H{"database": nil})
+		return
+	}
+
+	users := []model.User{}
+	model.DB.Select([]string{"id, key"}).Where("id = ?", databases[0].UserID).Find(&users)
+
+	key, err := util.Decrypt(users[0].Key)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	result, err := service.Notion{Token: *key}.GetDatabase(databases[0].DB_ID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var realObject datatypes.JSON
+	json, _ := json.Marshal(result)
+	realObject = datatypes.JSON([]byte(json))
+
+	databases[0].RealObject = realObject
+
+	if err := model.DB.Save(&databases[0]).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"database": databases[0]})
 }
