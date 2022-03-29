@@ -15,6 +15,7 @@ const Forms: FC = () => {
   const { data: forms, error: errorForms } = useSWR(`/forms/public/${params.id}`, fetcher)
   const [form] = useForm()
   const [formDb] = useForm()
+  const [collapsibleStates, setCollapsibleStates] = useState<{ [key: string]: boolean }>({})
   const [showAddModal, setShowAddModal] = useState<boolean>(false)
   const [searchFormName, setSearchFormName] = useState<string>()
   const [addLoading, setAddLoading] = useState<boolean>(false)
@@ -43,6 +44,7 @@ const Forms: FC = () => {
       form.setFieldsValue({
         forms: forms.forms.map((form: any) => ({ ...form, collapsed: true }))
       })
+      setCollapsibleStates(forms.forms.reduce((acc: any, form: any) => ({ ...acc, [form.id]: true }), {}))
     }
   }, [forms])
 
@@ -137,7 +139,12 @@ const Forms: FC = () => {
           {(fields, { remove }) => <>
             <SortableList items={
               fields.map((field, i) => ({
-                field, remove, i, form, onSaving: (val: boolean) => setIsSaving(val)
+                field,
+                remove,
+                i,
+                form,
+                collapsible: { collapsibleStates, setCollapsibleStates },
+                onSaving: (val: boolean) => setIsSaving(val)
               }))
             } onSortEnd={({ oldIndex, newIndex }: any) => {
               form.setFieldsValue({ forms: arrayMove(form.getFieldValue('forms'), oldIndex, newIndex) })

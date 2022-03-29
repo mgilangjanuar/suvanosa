@@ -7,7 +7,6 @@ import { req } from '../../../../utils/Fetcher'
 const SortableItem = SortableElement(({ value }: any) => {
   const [syncLoading, setSyncLoading] = useState<boolean>()
   const [removeLoading, setRemoveLoading] = useState<boolean>()
-  const [collapse, setCollapse] = useState<boolean>(true)
   const [required, setRequired] = useState<boolean>(value.form.getFieldValue('forms')?.[value.i]?.required)
 
   const remove = async () => {
@@ -109,8 +108,8 @@ const SortableItem = SortableElement(({ value }: any) => {
   }
 
   return <>
-    {!collapse ? <Card hoverable
-      title={<Layout.Content onClick={() => setCollapse(true)}>
+    {!value.collapsible.collapsibleStates[value.form.getFieldValue('forms')?.[value.i]?.id] ? <Card hoverable
+      title={<Layout.Content onClick={() => value.collapsible.setCollapsibleStates({ ...value.collapsible.collapsibleStates, [value.form.getFieldValue('forms')?.[value.i]?.id]: true })}>
         <DragHandle />
       </Layout.Content>}
       extra={<>
@@ -148,7 +147,7 @@ const SortableItem = SortableElement(({ value }: any) => {
           </Form.Item>
         </Layout.Content>
       </Form.Item>
-    </Card> : <Card hoverable style={{ margin: '20px 0', position: 'relative' }} onClick={() => setCollapse(false)}>
+    </Card> : <Card hoverable style={{ margin: '20px 0', position: 'relative' }} onClick={() => value.collapsible.setCollapsibleStates({ ...value.collapsible.collapsibleStates, [value.form.getFieldValue('forms')?.[value.i]?.id]: false })}>
       <Card.Meta title={<>
         <DragHandle /> {value.form.getFieldValue('forms')?.[value.i]?.label}
         {value.form.getFieldValue('forms')?.[value.i]?.required && <small style={{ float: 'right' }}>
