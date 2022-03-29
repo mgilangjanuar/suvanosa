@@ -44,7 +44,9 @@ const Details: FC = () => {
       form.setFieldsValue({
         forms: forms.forms.map((form: any) => ({ ...form, collapsed: true }))
       })
-      setCollapsibleStates(forms.forms.reduce((acc: any, form: any) => ({ ...acc, [form.id]: true }), {}))
+      setCollapsibleStates(forms.forms.reduce((acc: any, form: any) => ({
+        ...acc, [form.id]: collapsibleStates?.[form.id] || true
+      }), {}))
     }
   }, [forms])
 

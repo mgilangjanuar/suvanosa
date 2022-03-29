@@ -3,7 +3,7 @@ import { req } from '../../../../utils/Fetcher'
 
 export function useSearch(search?: string) {
   const [results, setResults] = useState<any[]>()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
     setLoading(true)

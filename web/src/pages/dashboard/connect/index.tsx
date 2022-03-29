@@ -17,7 +17,7 @@ const Connect: FC = () => {
     try {
       const { data } = await req.post('/databases', { id })
       setSaveLoading(false)
-      navigate(`/dashboard/forms/${data.database.id}`)
+      navigate(`/dashboard/details/${data.database.id}`)
     } catch (error) {
       setSaveLoading(false)
     }
@@ -29,7 +29,7 @@ const Connect: FC = () => {
       <Input.Search size="large" onSearch={setQuery} placeholder="Search your table in Notion..." allowClear loading={loading} defaultValue={query} />
     </Layout.Content>
 
-    {results !== undefined && <Layout.Content style={{ marginTop: '40px' }}>
+    <Layout.Content style={{ marginTop: '40px' }}>
       <h3>Search Results:</h3>
       {loading ? <Spin /> : <>
         {results?.length ? <>
@@ -38,7 +38,7 @@ const Connect: FC = () => {
           } />)}
         </> : <Empty />}
       </>}
-    </Layout.Content>}
+    </Layout.Content>
   </>
 }
 
