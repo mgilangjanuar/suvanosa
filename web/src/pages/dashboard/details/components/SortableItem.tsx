@@ -127,16 +127,16 @@ const SortableItem = SortableElement(({ value }: any) => {
           <Tag style={{ float: 'right' }}>
             {value.form.getFieldValue('forms')?.[value.i]?.type}
           </Tag>
-          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']}>
+          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']} key={[value.field.fieldKey, 'label']}>
             <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." />
           </Form.Item>
-          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'description']} fieldKey={[value.field.fieldKey, 'description']}>
+          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'description']} fieldKey={[value.field.fieldKey, 'description']} key={[value.field.fieldKey, 'description']}>
             <Input onBlur={() => update()} bordered={false} placeholder="Write your description or leave it blank..." />
           </Form.Item>
-          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'help']} fieldKey={[value.field.fieldKey, 'help']}>
+          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'help']} fieldKey={[value.field.fieldKey, 'help']} key={[value.field.fieldKey, 'help']}>
             <Input onBlur={() => update()} bordered={false} placeholder="Write your help text or leave it blank..." />
           </Form.Item>
-          <Form.Item valuePropName="checked" { ...fieldCol } {...value.field} name={[value.field.name, 'required']} fieldKey={[value.field.fieldKey, 'required']}>
+          <Form.Item valuePropName="checked" { ...fieldCol } {...value.field} name={[value.field.name, 'required']} fieldKey={[value.field.fieldKey, 'required']} key={[value.field.fieldKey, 'required']}>
             <Checkbox onChange={({ target }) => {
               setRequired(target.checked)
               update({

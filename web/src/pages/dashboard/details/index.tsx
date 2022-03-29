@@ -8,7 +8,7 @@ import useSWR from 'swr'
 import { fetcher, req } from '../../../utils/Fetcher'
 import SortableList from './components/SortableList'
 
-const Forms: FC = () => {
+const Details: FC = () => {
   const navigate = useNavigate()
   const params = useParams()
   const { data: db, error: errorDb } = useSWR(`/databases/${params.id}`, fetcher)
@@ -124,7 +124,7 @@ const Forms: FC = () => {
           const last = routes.indexOf(route) === routes.length - 1
           return last ? <span>{route.breadcrumbName}</span> : <Link to={route.path}>{route.breadcrumbName}</Link>
         } }} extra={[
-          <Typography.Paragraph style={{ marginTop: '10px' }}>{isSaving ? <><LoadingOutlined /> Saving</> : <><CheckCircleOutlined /> Saved</>}</Typography.Paragraph>
+          <Typography.Paragraph key="saved-status" style={{ marginTop: '10px' }}>{isSaving ? <><LoadingOutlined /> Saving</> : <><CheckCircleOutlined /> Saved</>}</Typography.Paragraph>
         ]}>
           <Form.Item name="description">
             <Input.TextArea onBlur={() => update(formDb.getFieldsValue())} placeholder="Write the survey description here..." bordered={false} />
@@ -174,4 +174,4 @@ const Forms: FC = () => {
   </>
 }
 
-export default Forms
+export default Details

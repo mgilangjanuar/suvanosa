@@ -3,9 +3,9 @@ import { Col, Layout, Menu, Row } from 'antd'
 import { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { req } from '../../utils/Fetcher'
-import Forms from './forms'
 import Connect from './connect'
 import Database from './database'
+import Details from './details'
 
 const Dashboard: FC = () => {
   const params = useParams()
@@ -36,7 +36,7 @@ const Dashboard: FC = () => {
           <Col xxl={{ span: 14, offset: 5 }} xl={{ span: 16, offset: 4 }} lg={{ span: 18, offset: 3 }} md={{ span: 20, offset: 2 }} span={24}>
             {params.page === 'database' && <Database />}
             {params.page === 'connect' && <Connect />}
-            {params.page === 'forms' && <Forms />}
+            {params.page === 'details' && <Details />}
           </Col>
         </Row>
       </Layout.Content>

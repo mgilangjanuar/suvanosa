@@ -34,7 +34,7 @@ const Database: FC = () => {
             <Popconfirm title="Are you sure?" onConfirm={() => remove(db.id)}>
               <Button loading={removeLoading} shape="round" danger type="text" icon={<DeleteOutlined />} />
             </Popconfirm>
-            <Button type="text" shape="round" onClick={() => navigate(`/dashboard/forms/${db.id}`)} icon={<ArrowRightOutlined />} />
+            <Button type="text" shape="round" onClick={() => navigate(`/dashboard/details/${db.id}`)} icon={<ArrowRightOutlined />} />
           </Space>} url={`${location.origin}/forms/${db.id}`} />)}
         </> : <Space direction="vertical">
           <Typography.Paragraph type="secondary">
