@@ -41,7 +41,7 @@ const Forms: FC = () => {
   useEffect(() => {
     if (forms?.forms) {
       form.setFieldsValue({
-        forms: forms.forms
+        forms: forms.forms.map((form: any) => ({ ...form, collapsed: true }))
       })
     }
   }, [forms])
@@ -113,7 +113,7 @@ const Forms: FC = () => {
       <Form form={formDb}>
         <PageHeader title={
           <Form.Item name="title" style={{ marginBottom: 0 }}>
-            <Input style={{ fontSize: '20px', marginBottom: 0 }} onBlur={() => update(formDb.getFieldsValue())} size="large" bordered={false} placeholder="Edit your survey name..." />
+            <Input style={{ fontSize: '20px', marginBottom: 0, padding: 0 }} onBlur={() => update(formDb.getFieldsValue())} size="large" bordered={false} placeholder="Edit your survey name..." />
           </Form.Item>
         } onBack={() => navigate(-1)} breadcrumb={{ routes: [
           { path: '/dashboard/database', breadcrumbName: 'Database' },
@@ -137,7 +137,7 @@ const Forms: FC = () => {
           {(fields, { remove }) => <>
             <SortableList items={
               fields.map((field, i) => ({
-                field, remove, i, form
+                field, remove, i, form, onSaving: (val: boolean) => setIsSaving(val)
               }))
             } onSortEnd={({ oldIndex, newIndex }: any) => {
               form.setFieldsValue({ forms: arrayMove(form.getFieldValue('forms'), oldIndex, newIndex) })
