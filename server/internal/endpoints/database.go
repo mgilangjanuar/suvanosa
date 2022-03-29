@@ -148,17 +148,19 @@ func (d Database) retrieve(c *gin.Context) {
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{"database": databases[0]})
+
+	// update real object
+
 	users := []model.User{}
 	model.DB.Select([]string{"id, key"}).Where("id = ?", databases[0].UserID).Find(&users)
 
 	key, err := util.Decrypt(users[0].Key)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	result, err := service.Notion{Token: *key}.GetDatabase(databases[0].DB_ID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -169,11 +171,8 @@ func (d Database) retrieve(c *gin.Context) {
 	databases[0].RealObject = realObject
 
 	if err := model.DB.Save(&databases[0]).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"database": databases[0]})
 }
 
 func (d Database) delete(c *gin.Context) {
