@@ -1,6 +1,6 @@
 import { DeleteOutlined, MenuOutlined, SyncOutlined } from '@ant-design/icons'
-import { Button, Card, Checkbox, DatePicker, Form, Input, InputNumber, Layout, notification, Popconfirm, Select, Space, Tag, Tooltip, Typography } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { Button, Card, Checkbox, Form, Input, Layout, notification, Popconfirm, Tag, Tooltip, Typography } from 'antd'
+import { useEffect, useState } from 'react'
 import { SortableElement, SortableHandle } from 'react-sortable-hoc'
 import { req } from '../../../../utils/Fetcher'
 
@@ -11,11 +11,9 @@ const SortableItem = SortableElement(({ value }: any) => {
 
   const remove = async () => {
     setRemoveLoading(true)
+    value.onSaving(true)
     try {
       await req.delete(`/forms/${value.form.getFieldValue('forms')?.[value.i]?.id}`)
-      notification.success({
-        message: 'Deleted'
-      })
       value.form.setFieldsValue({
         forms: value.form.getFieldValue('forms').map((form: any, i: number) => {
           if (i === value.i) {
@@ -25,16 +23,19 @@ const SortableItem = SortableElement(({ value }: any) => {
         }).filter(Boolean)
       })
       setRemoveLoading(false)
+      value.onSaving(false)
     } catch (error) {
       notification.error({
         message: 'Something error'
       })
       setRemoveLoading(false)
+      value.onSaving(false)
     }
   }
 
   const sync = async () => {
     setSyncLoading(true)
+    value.onSaving(true)
     try {
       const { data } = await req.patch(`/forms/${value.form.getFieldValue('forms')?.[value.i]?.id}/sync`)
       value.form.setFieldsValue({
@@ -45,15 +46,14 @@ const SortableItem = SortableElement(({ value }: any) => {
           return form
         })
       })
-      notification.success({
-        message: 'Synced'
-      })
       setSyncLoading(false)
+      value.onSaving(false)
     } catch (error) {
       notification.error({
         message: 'Something error'
       })
       setSyncLoading(false)
+      value.onSaving(false)
     }
   }
 
@@ -87,24 +87,6 @@ const SortableItem = SortableElement(({ value }: any) => {
         description: `Failed to save form: ${data.label}`
       })
     }
-  }
-
-  const _FormItem: FC<{ form: any }> = ({ form }) => {
-    return <Form layout="vertical">
-      <Form.Item label={<Space direction="vertical">
-        <Typography.Title level={5}>{form.label}</Typography.Title>
-        <Typography.Paragraph type="secondary">{form.description}</Typography.Paragraph>
-      </Space>} help={form.help}>
-        {form.type === 'title' || form.type === 'rich_text' ? <Input /> : <></>}
-        {form.type === 'email' ? <Input type="email" /> : <></>}
-        {form.type === 'number' ? <InputNumber /> : <></>}
-        {form.type === 'date' && form.date_type !== 'range' ? <DatePicker showTime style={{ width: '100%' }} /> : <></>}
-        {form.type === 'date' && form.date_type === 'range' ? <DatePicker.RangePicker showTime style={{ width: '100%' }} /> : <></>}
-        {form.type === 'select' ? <Select>
-          {form.options.map((option: any) => <Select.Option key={option.id} value={option.name}>{option.name}</Select.Option>)}
-        </Select> : <></>}
-      </Form.Item>
-    </Form>
   }
 
   return <>

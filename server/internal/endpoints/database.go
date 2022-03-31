@@ -148,31 +148,32 @@ func (d Database) retrieve(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"database": databases[0]})
-
 	// update real object
+	go func(database model.Database) {
+		users := []model.User{}
+		model.DB.Select([]string{"id, key"}).Where("id = ?", database.UserID).Find(&users)
 
-	users := []model.User{}
-	model.DB.Select([]string{"id, key"}).Where("id = ?", databases[0].UserID).Find(&users)
+		key, err := util.Decrypt(users[0].Key)
+		if err != nil {
+			return
+		}
+		result, err := service.Notion{Token: *key}.GetDatabase(database.DB_ID)
+		if err != nil {
+			return
+		}
 
-	key, err := util.Decrypt(users[0].Key)
-	if err != nil {
-		return
-	}
-	result, err := service.Notion{Token: *key}.GetDatabase(databases[0].DB_ID)
-	if err != nil {
-		return
-	}
+		var realObject datatypes.JSON
+		json, _ := json.Marshal(result)
+		realObject = datatypes.JSON([]byte(json))
 
-	var realObject datatypes.JSON
-	json, _ := json.Marshal(result)
-	realObject = datatypes.JSON([]byte(json))
+		database.RealObject = realObject
 
-	databases[0].RealObject = realObject
+		if err := model.DB.Save(&database).Error; err != nil {
+			return
+		}
+	}(databases[0])
 
-	if err := model.DB.Save(&databases[0]).Error; err != nil {
-		return
-	}
+	c.JSON(http.StatusOK, gin.H{"database": databases[0]})
 }
 
 func (d Database) delete(c *gin.Context) {

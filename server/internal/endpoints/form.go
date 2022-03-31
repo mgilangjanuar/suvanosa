@@ -41,8 +41,8 @@ func (f Form) list(c *gin.Context) {
 	}
 
 	ids := []uuid.UUID{}
-	for i := range databases {
-		ids = append(ids, databases[i].ID)
+	for _, database := range databases {
+		ids = append(ids, database.ID)
 	}
 
 	forms := []model.Form{}
@@ -251,8 +251,8 @@ func (f Form) update(c *gin.Context) {
 	model.DB.Select("id").Where("user_id = ?", user.ID).Find(&databases)
 
 	ids := []uuid.UUID{}
-	for i := range databases {
-		ids = append(ids, databases[i].ID)
+	for _, database := range databases {
+		ids = append(ids, database.ID)
 	}
 
 	forms := []model.Form{}
@@ -303,8 +303,8 @@ func (f Form) delete(c *gin.Context) {
 	model.DB.Select("id").Where("user_id = ?", user.ID).Find(&databases)
 
 	ids := []uuid.UUID{}
-	for i := range databases {
-		ids = append(ids, databases[i].ID)
+	for _, database := range databases {
+		ids = append(ids, database.ID)
 	}
 
 	forms := []model.Form{}
@@ -329,6 +329,10 @@ func BuildForm(k string, v interface{}, databaseID uuid.UUID) *model.Form {
 	var optionsJson datatypes.JSON
 	if value["type"].(string) == "select" {
 		json, _ := json.Marshal(value["select"].(map[string]interface{})["options"])
+		optionsJson = datatypes.JSON([]byte(json))
+	}
+	if value["type"].(string) == "multi_select" {
+		json, _ := json.Marshal(value["multi_select"].(map[string]interface{})["options"])
 		optionsJson = datatypes.JSON([]byte(json))
 	}
 
@@ -368,10 +372,12 @@ func ParseToProperties(data map[string]interface{}, forms []model.Form) map[stri
 					},
 				}
 			} else if form.Type == "multi_select" {
+				vals := []map[string]string{}
+				for _, v := range val.([]interface{}) {
+					vals = append(vals, map[string]string{"name": v.(string)})
+				}
 				result[form.Name] = map[string]interface{}{
-					"multi_select": []map[string]string{
-						{"name": val.(string)},
-					},
+					"multi_select": vals,
 				}
 			} else if form.Type == "date" {
 				if form.DateType == "range" {

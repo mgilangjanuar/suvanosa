@@ -11,7 +11,7 @@ import Home from './pages/Home'
 function App() {
   return (
     <Layout className="App">
-      <Header />
+      {!/\/forms\//gi.test(location.pathname) && <Header />}
       <Routes>
         <Route path="/">
           <Route index element={<Home />} />
