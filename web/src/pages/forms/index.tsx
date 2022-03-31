@@ -1,9 +1,10 @@
 import { ArrowRightOutlined } from '@ant-design/icons'
-import { Button, Checkbox, Col, DatePicker, Divider, Form, Input, InputNumber, Layout, notification, PageHeader, Row, Select, Space, Typography } from 'antd'
+import { Button, Col, Divider, Form, Layout, notification, PageHeader, Row, Typography } from 'antd'
 import { FC, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import useSWR from 'swr'
 import { fetcher, req } from '../../utils/Fetcher'
+import RenderedFormItem from './components/RenderedFormItem'
 
 const Forms: FC = () => {
   const navigate = useNavigate()
@@ -37,68 +38,6 @@ const Forms: FC = () => {
         description: 'Please reload to try again',
       })
     }
-  }
-
-  const WrapperFormItem: React.FC<{ data: any, valuePropName?: string }> = ({ children, data, valuePropName }) => {
-    return <Form.Item name={data.name} label={<Space direction="vertical">
-      <Typography.Title level={5}>{data.label}</Typography.Title>
-      {data.description && <Typography.Paragraph type="secondary">{data.description}</Typography.Paragraph>}
-    </Space>} help={data.help || undefined} valuePropName={valuePropName || undefined} rules={[{ required: data.required, message: `${data.label} can't be blank` }]}>
-      {children}
-    </Form.Item>
-  }
-
-  const RenderedFormItem: React.FC<{ data: any }> = ({ data }) => {
-    if (data.type === 'title') {
-      return <WrapperFormItem data={data}>
-        <Input />
-      </WrapperFormItem>
-    }
-    if (data.type === 'rich_text') {
-      return <WrapperFormItem data={data}>
-        <Input.TextArea />
-      </WrapperFormItem>
-    }
-    if (data.type === 'email') {
-      return <WrapperFormItem data={data}>
-        <Input type="email" />
-      </WrapperFormItem>
-    }
-    if (data.type === 'number') {
-      return <WrapperFormItem data={data}>
-        <InputNumber type="number" style={{ width: '100%' }} />
-      </WrapperFormItem>
-    }
-    if (data.type === 'date') {
-      if (data.date_type === 'range') {
-        return <WrapperFormItem data={data}>
-          <DatePicker.RangePicker showTime style={{ width: '100%' }} />
-        </WrapperFormItem>
-      }
-      return <WrapperFormItem data={data}>
-        <DatePicker showTime style={{ width: '100%' }} />
-      </WrapperFormItem>
-    }
-    if (data.type === 'select') {
-      return <WrapperFormItem data={data}>
-        <Select>
-          {data.options?.map((option: any) => <Select.Option key={option.id} value={option.name}>{option.name}</Select.Option>)}
-        </Select>
-      </WrapperFormItem>
-    }
-    if (data.type === 'multi_select') {
-      return <WrapperFormItem data={data}>
-        <Select mode="multiple">
-          {data.options?.map((option: any) => <Select.Option key={option.id} value={option.name}>{option.name}</Select.Option>)}
-        </Select>
-      </WrapperFormItem>
-    }
-    if (data.type === 'checkbox') {
-      return <WrapperFormItem data={data} valuePropName="checked">
-        <Checkbox />
-      </WrapperFormItem>
-    }
-    return <></>
   }
 
   return <Layout.Content className="container">
