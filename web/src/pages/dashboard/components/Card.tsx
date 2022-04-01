@@ -14,7 +14,7 @@ const Card: FC<Props> = ({ name, data, url, extra }) => {
     <BaseCard.Meta description={<>
       <Descriptions column={1} labelStyle={{ fontWeight: 'bold' }}>
         <Descriptions.Item label="Properties">
-          {Object.keys(data.properties).join(', ')}
+          <em>{Object.keys(data.properties).join(', ')}</em>
         </Descriptions.Item>
         <Descriptions.Item label="Created At">
           {moment(data.created_time).local().format('lll')}

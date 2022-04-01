@@ -1,6 +1,6 @@
-import { ArrowRightOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
 import { Button, Col, Divider, Form, Layout, notification, PageHeader, Row, Typography } from 'antd'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import useSWR from 'swr'
 import { fetcher, req } from '../../utils/Fetcher'
@@ -12,6 +12,7 @@ const Forms: FC = () => {
   const [form] = Form.useForm()
   const { data: db, error: errorDb } = useSWR(`/databases/${params.id}`, fetcher)
   const { data: forms, error: errorForms } = useSWR(`/forms/public/${params.id}`, fetcher)
+  const [isDone, setIsDone] = useState<boolean>(false)
 
   useEffect(() => {
     if (errorDb || errorForms) {
@@ -31,7 +32,11 @@ const Forms: FC = () => {
   const submit = async () => {
     const data = form.getFieldsValue()
     try {
-      await req.post(`/forms/public/${db?.database.id}`, { forms: data })
+      await req.post(`/forms/public/${db?.database.id}`, {
+        forms: Object.keys(data).reduce((res, k) =>
+          ({ ...res, [k]: data[k] || undefined }), {})
+      })
+      setIsDone(true)
     } catch (error) {
       notification.error({
         message: 'Something error',
@@ -49,7 +54,7 @@ const Forms: FC = () => {
           </Typography.Paragraph>}
         </PageHeader>
         <Divider />
-        <Form layout="vertical" form={form} onFinish={submit}>
+        {!isDone ? <Form layout="vertical" form={form} onFinish={submit}>
           {forms?.forms.map((f: any) =>
             <RenderedFormItem key={f.id} data={f} />
           )}
@@ -57,7 +62,14 @@ const Forms: FC = () => {
           <Form.Item style={{ textAlign: 'right' }} wrapperCol={{ offset: 6, span: 12 }}>
             <Button htmlType="submit" type="default" block>Send <ArrowRightOutlined /></Button>
           </Form.Item>
-        </Form>
+        </Form> : <>
+          <Typography.Paragraph>
+            <Typography.Text strong>Thank you! Your response has already been sent.</Typography.Text> Have a good day, stay safe, and healthy wherever you are 😬
+          </Typography.Paragraph>
+          <Typography.Paragraph style={{ textAlign: 'center', marginTop: '48px' }}>
+            <Button onClick={() => window.close()} icon={<CloseOutlined />}>Close</Button>
+          </Typography.Paragraph>
+        </>}
       </Col>
     </Row>
   </Layout.Content>
