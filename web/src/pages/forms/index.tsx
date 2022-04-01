@@ -13,6 +13,7 @@ const Forms: FC = () => {
   const { data: db, error: errorDb } = useSWR(`/databases/${params.id}`, fetcher)
   const { data: forms, error: errorForms } = useSWR(`/forms/public/${params.id}`, fetcher)
   const [isDone, setIsDone] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
     if (errorDb || errorForms) {
@@ -30,6 +31,7 @@ const Forms: FC = () => {
   }, [db])
 
   const submit = async () => {
+    setLoading(true)
     const data = form.getFieldsValue()
     try {
       await req.post(`/forms/public/${db?.database.id}`, {
@@ -37,11 +39,13 @@ const Forms: FC = () => {
           ({ ...res, [k]: data[k] || undefined }), {})
       })
       setIsDone(true)
+      setLoading(false)
     } catch (error) {
       notification.error({
         message: 'Something error',
         description: 'Please reload to try again',
       })
+      setLoading(false)
     }
   }
 
@@ -60,7 +64,7 @@ const Forms: FC = () => {
           )}
           <Divider />
           <Form.Item style={{ textAlign: 'right' }} wrapperCol={{ offset: 6, span: 12 }}>
-            <Button htmlType="submit" type="default" block>Send <ArrowRightOutlined /></Button>
+            <Button loading={loading} htmlType="submit" type="default" block>Send <ArrowRightOutlined /></Button>
           </Form.Item>
         </Form> : <>
           <Typography.Paragraph>
