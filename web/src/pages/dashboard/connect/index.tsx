@@ -33,9 +33,16 @@ const Connect: FC = () => {
       <h3>Search Results:</h3>
       {loading ? <Spin /> : <>
         {results?.length ? <>
-          {results?.map(result => <Card key={result.id} data={result} extra={
-            <Button loading={saveLoading} type="text" shape="round" onClick={() => save(result.id)} icon={<ArrowRightOutlined />}>Save</Button>
-          } />)}
+          {results?.map(result => <Card
+            key={result.id}
+            data={result}
+            onClick={() => save(result.id)}
+            extra={
+              <Button size="small" loading={saveLoading} type="text" shape="round"
+                onClick={() => save(result.id)} icon={<ArrowRightOutlined />}>
+                  Save
+              </Button>
+            } />)}
         </> : <Empty />}
       </>}
     </Layout.Content>

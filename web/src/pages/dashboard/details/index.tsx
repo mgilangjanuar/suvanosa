@@ -1,12 +1,14 @@
-import { CheckCircleOutlined, LoadingOutlined, PlusOutlined } from '@ant-design/icons'
-import { AutoComplete, Button, Form, Input, Layout, Modal, notification, PageHeader, Typography } from 'antd'
+import { CheckCircleOutlined, CopyOutlined, DeleteOutlined, LinkOutlined, LoadingOutlined, PlusOutlined, TableOutlined } from '@ant-design/icons'
+import { AutoComplete, Button, Form, Input, Layout, message, Modal, notification, PageHeader, Popconfirm, Popover, Typography } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
+import clipboard from 'clipboardy'
 import { FC, useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { arrayMove } from 'react-sortable-hoc'
 import useSWR from 'swr'
 import { fetcher, req } from '../../../utils/Fetcher'
 import SortableList from './components/SortableList'
+import { useRemoveDatabase } from './hooks/useRemoveDatabase'
 
 const Details: FC = () => {
   const navigate = useNavigate()
@@ -20,6 +22,7 @@ const Details: FC = () => {
   const [searchFormName, setSearchFormName] = useState<string>()
   const [addLoading, setAddLoading] = useState<boolean>(false)
   const [isSaving, setIsSaving] = useState<boolean>(false)
+  const { remove, loading: removeLoading } = useRemoveDatabase()
 
   useEffect(() => {
     if (errorDb || errorForms) {
@@ -115,7 +118,7 @@ const Details: FC = () => {
   return <>
     <Layout.Content>
       <Form form={formDb}>
-        <PageHeader title={
+        <PageHeader style={{ padding: 0 }} title={
           <Form.Item name="title" style={{ marginBottom: 0 }}>
             <Input style={{ fontSize: '20px', marginBottom: 0, padding: 0 }} onBlur={() => update(formDb.getFieldsValue())} size="large" bordered={false} placeholder="Edit your survey name..." />
           </Form.Item>
@@ -126,7 +129,29 @@ const Details: FC = () => {
           const last = routes.indexOf(route) === routes.length - 1
           return last ? <span>{route.breadcrumbName}</span> : <Link to={route.path}>{route.breadcrumbName}</Link>
         } }} extra={[
-          <Typography.Paragraph key="saved-status" style={{ marginTop: '10px' }}>{isSaving ? <><LoadingOutlined /> Saving</> : <><CheckCircleOutlined /> Saved</>}</Typography.Paragraph>
+          <Popconfirm title="Are you sure?" placement="bottom" onConfirm={() => remove(db?.database.id, () => navigate(-1))}>
+            <Button size="small" loading={removeLoading} shape="round" danger type="text" icon={<DeleteOutlined />} />
+          </Popconfirm>,
+          <Button size="small" type="text" shape="round" icon={<TableOutlined />} href={db?.database.real_object.url} target="_blank" />,
+          <Popover trigger={['click']} placement="bottom" title="Form URL" content={<Layout.Content>
+            <Form.Item>
+              <Input.Search
+                enterButton={<CopyOutlined />}
+                value={`${location.origin}/forms/${db?.database.id}`}
+                contentEditable={false}
+                onSearch={val => {
+                  clipboard.write(val).then(() => message.success('Copied to clipboard'))
+                }} />
+            </Form.Item>
+            <Typography.Paragraph>
+              <Button block href={`${location.origin}/forms/${db?.database.id}`} target="_blank">Open Form</Button>
+            </Typography.Paragraph>
+          </Layout.Content>}>
+            <Button size="small" type="text" shape="round" icon={<LinkOutlined />} />
+          </Popover>,
+          <Typography.Paragraph type="secondary" key="saved-status" style={{ marginTop: '13px', marginLeft: '5px' }}>
+            {isSaving ? <><LoadingOutlined /> Saving</> : <><CheckCircleOutlined /> Saved</>}
+          </Typography.Paragraph>
         ]}>
           <Form.Item name="description">
             <Input.TextArea onBlur={() => update(formDb.getFieldsValue())} placeholder="Write the survey description here..." bordered={false} />
@@ -153,7 +178,7 @@ const Details: FC = () => {
               updateFormsOrder()
             }} useDragHandle useWindowAsScrollContainer />
             <Form.Item wrapperCol={{ span: 24 }}>
-              <Button type="dashed" onClick={() => setShowAddModal(true)} block icon={<PlusOutlined />}>
+              <Button size="large" type="dashed" onClick={() => setShowAddModal(true)} block icon={<PlusOutlined />}>
                 Add form item
               </Button>
             </Form.Item>

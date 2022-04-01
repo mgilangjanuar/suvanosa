@@ -1,5 +1,5 @@
 import { DeleteOutlined, MenuOutlined, SyncOutlined } from '@ant-design/icons'
-import { Button, Card, Checkbox, Form, Input, Layout, notification, Popconfirm, Tag, Tooltip, Typography } from 'antd'
+import { Button, Card, Checkbox, Form, Input, Layout, notification, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { SortableElement, SortableHandle } from 'react-sortable-hoc'
 import { req } from '../../../../utils/Fetcher'
@@ -94,14 +94,14 @@ const SortableItem = SortableElement(({ value }: any) => {
       title={<Layout.Content onClick={() => value.collapsible.setCollapsibleStates({ ...value.collapsible.collapsibleStates, [value.form.getFieldValue('forms')?.[value.i]?.id]: true })}>
         <DragHandle />
       </Layout.Content>}
-      extra={<>
+      extra={<Space size={0}>
         <Popconfirm title="Are you sure to delete this?" onConfirm={remove}>
           <Button loading={removeLoading} size="small" type="text" shape="round" danger icon={<DeleteOutlined />} />
         </Popconfirm>
         <Tooltip title="Sync from Notion">
           <Button loading={syncLoading} size="small" type="text" shape="round" onClick={() => sync()} icon={<SyncOutlined />} />
         </Tooltip>
-      </>}
+      </Space>}
       bodyStyle={{ paddingBottom: 0 }}
       style={{ margin: '20px 0' }}>
       <Form.Item>
@@ -110,7 +110,7 @@ const SortableItem = SortableElement(({ value }: any) => {
             {value.form.getFieldValue('forms')?.[value.i]?.type}
           </Tag>
           <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']} key={[value.field.fieldKey, 'label']}>
-            <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." />
+            <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." style={{ fontSize: '16px' }} />
           </Form.Item>
           <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'description']} fieldKey={[value.field.fieldKey, 'description']} key={[value.field.fieldKey, 'description']}>
             <Input onBlur={() => update()} bordered={false} placeholder="Write your description or leave it blank..." />
