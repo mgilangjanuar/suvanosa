@@ -45,10 +45,10 @@ const Forms: FC = () => {
     }
   }
 
-  return <Layout.Content className="container">
+  return <Layout.Content className="container" style={{ paddingTop: '60px', paddingBottom: '60px' }}>
     <Row>
       <Col xxl={{ span: 8, offset: 8 }} xl={{ span: 10, offset: 7 }} lg={{ span: 12, offset: 6 }} md={{ span: 16, offset: 4 }} span={24}>
-        <PageHeader title={db?.database.title}>
+        <PageHeader style={{ padding: 0 }} title={db?.database.title}>
           {db?.database.description && <Typography.Paragraph>
             {db?.database.description}
           </Typography.Paragraph>}
