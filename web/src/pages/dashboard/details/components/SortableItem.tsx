@@ -106,7 +106,7 @@ const SortableItem = SortableElement(({ value }: any) => {
       bodyStyle={{ paddingBottom: 0 }}
       style={{ margin: '20px 0' }}>
       <Form.Item>
-        <PopoverTutorial name={`form-${value.i}`} title="4/4 Form Details" content="Edit your label, description, and help text for your input." next="_done" tutorialStates={value.tutorialStates}>
+        <PopoverTutorial name={`form-${value.i}`} title="4/5 Form Details" content="Edit your label, description, and help text for your input." next="url" tutorialStates={value.tutorialStates}>
           <Layout.Content>
             <Tag style={{ float: 'right' }}>
               {value.form.getFieldValue('forms')?.[value.i]?.type}
@@ -132,25 +132,21 @@ const SortableItem = SortableElement(({ value }: any) => {
           </Layout.Content>
         </PopoverTutorial>
       </Form.Item>
-    </Card> : <CollapsedCard value={value} />}
+    </Card> : <Card hoverable style={{ margin: '20px 0', position: 'relative' }} onClick={() => value.collapsible.setCollapsibleStates({ ...value.collapsible.collapsibleStates, [value.form.getFieldValue('forms')?.[value.i]?.id]: false })}>
+      <Card.Meta title={<>
+        <PopoverTutorial name={`reorder-${value.i}`} title="3/5 Reorder Form" content="Hold and drag to sort the forms order." next="form-0" tutorialStates={value.tutorialStates}>
+          <DragHandle />
+        </PopoverTutorial> {value.form.getFieldValue('forms')?.[value.i]?.label}
+        {value.form.getFieldValue('forms')?.[value.i]?.required && <small style={{ float: 'right' }}>
+          <Typography.Text type="secondary" italic> Required</Typography.Text>
+        </small>}
+      </>}
+      />
+    </Card>}
   </>
 })
 
-const CollapsedCard: FC<{ value: any }> = ({ value }) => {
-  return <Card hoverable style={{ margin: '20px 0', position: 'relative' }} onClick={() => value.collapsible.setCollapsibleStates({ ...value.collapsible.collapsibleStates, [value.form.getFieldValue('forms')?.[value.i]?.id]: false })}>
-    <Card.Meta title={<>
-      <PopoverTutorial name={`reorder-${value.i}`} title="3/4 Reorder Form" content="Hold and drag to sort the forms order." next="form-0" tutorialStates={value.tutorialStates}>
-        <DragHandle />
-      </PopoverTutorial> {value.form.getFieldValue('forms')?.[value.i]?.label}
-      {value.form.getFieldValue('forms')?.[value.i]?.required && <small style={{ float: 'right' }}>
-        <Typography.Text type="secondary" italic> Required</Typography.Text>
-      </small>}
-    </>}
-    />
-  </Card>
-}
-
-const DragHandle = SortableHandle(() => <Tooltip title="Hold &amp; drag to sort">
+const DragHandle = SortableHandle(() => <Tooltip destroyTooltipOnHide title="Hold &amp; drag to sort">
   <Button size="small" type="text"><MenuOutlined /></Button>
 </Tooltip>)
 

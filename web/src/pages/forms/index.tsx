@@ -1,5 +1,5 @@
 import { ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
-import { Button, Col, Divider, Form, Layout, notification, PageHeader, Row, Typography } from 'antd'
+import { Button, Col, Divider, Form, Input, Layout, notification, PageHeader, Row, Typography } from 'antd'
 import { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import useSWR from 'swr'
@@ -58,7 +58,8 @@ const Forms: FC = () => {
           </Typography.Paragraph>}
         </PageHeader>
         <Divider />
-        {!isDone ? <Form layout="vertical" form={form} onFinish={submit}>
+        {!isDone ? <Form autoComplete="off" layout="vertical" form={form} onFinish={submit}>
+          <Input type="hidden" autoComplete="false" />
           {forms?.forms.map((f: any) =>
             <RenderedFormItem key={f.id} data={f} />
           )}
