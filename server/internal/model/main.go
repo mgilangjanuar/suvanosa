@@ -6,10 +6,15 @@ import (
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func Run() (*gorm.DB, error) {
-	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URI")), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URI")), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix: "suvanosa_",
+		},
+	})
 	if err != nil {
 		return nil, err
 	}

@@ -1,6 +1,6 @@
 import { DeleteOutlined, MenuOutlined, SyncOutlined } from '@ant-design/icons'
 import { Button, Card, Checkbox, Form, Input, Layout, notification, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
-import { FC, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SortableElement, SortableHandle } from 'react-sortable-hoc'
 import { req } from '../../../../utils/Fetcher'
 import PopoverTutorial from './PopoverTutorial'
@@ -146,9 +146,7 @@ const SortableItem = SortableElement(({ value }: any) => {
   </>
 })
 
-const DragHandle = SortableHandle(() => <Tooltip destroyTooltipOnHide title="Hold &amp; drag to sort">
-  <Button size="small" type="text"><MenuOutlined /></Button>
-</Tooltip>)
+const DragHandle = SortableHandle(() => <Button type="text" shape="round" icon={<MenuOutlined />} />)
 
 const fieldCol = {
   labelCol: { span: 24 },

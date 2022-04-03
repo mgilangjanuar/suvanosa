@@ -2,7 +2,6 @@ package endpoints
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 	"suvanosa/internal/middleware"
@@ -55,7 +54,7 @@ func (f Form) public(c *gin.Context) {
 	databaseID := c.Param("databaseID")
 
 	forms := []model.Form{}
-	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Order("forms.order").Find(&forms)
+	model.DB.Where("database_id = ?", uuid.Must(uuid.Parse(databaseID))).Order("\"order\"").Find(&forms)
 
 	c.JSON(http.StatusOK, gin.H{"forms": forms})
 }
@@ -154,7 +153,6 @@ func (f Form) add(c *gin.Context) {
 	}
 
 	for k, v := range result.Properties {
-		fmt.Println(k, *data.Name)
 		if k == *data.Name {
 			form := BuildForm(k, v, databases[0].ID)
 			model.DB.Create(form)
