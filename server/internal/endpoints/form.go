@@ -3,7 +3,6 @@ package endpoints
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"suvanosa/internal/middleware"
 	"suvanosa/internal/model"
 	"suvanosa/internal/util"
@@ -229,6 +228,8 @@ func (f Form) update(c *gin.Context) {
 			Description *string         `json:"description"`
 			Required    *bool           `json:"required"`
 			Order       *int            `json:"order"`
+			DateType    *string         `json:"date_type"`
+			TextType    *string         `json:"text_type"`
 			Options     *datatypes.JSON `json:"options"`
 		} `json:"form"`
 	}
@@ -266,6 +267,12 @@ func (f Form) update(c *gin.Context) {
 	}
 	if data.Form.Type != nil {
 		forms[0].Type = *data.Form.Type
+	}
+	if data.Form.DateType != nil {
+		forms[0].DateType = *data.Form.DateType
+	}
+	if data.Form.TextType != nil {
+		forms[0].TextType = *data.Form.TextType
 	}
 	if data.Form.Help != nil {
 		forms[0].Help = *data.Form.Help
@@ -379,7 +386,10 @@ func ParseToProperties(data map[string]interface{}, forms []model.Form) map[stri
 				}
 			} else if form.Type == "date" {
 				if form.DateType == "range" {
-					dates := strings.Split(val.(string), " - ")
+					dates := []string{}
+					for _, date := range val.([]interface{}) {
+						dates = append(dates, date.(string))
+					}
 					result[form.Name] = map[string]interface{}{
 						"date": map[string]string{
 							"start": dates[0],

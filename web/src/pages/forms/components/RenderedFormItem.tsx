@@ -10,7 +10,7 @@ const RenderedFormItem: FC<{ data: any }> = ({ data }) => {
   }
   if (data.type === 'rich_text') {
     return <WrapperFormItem data={data}>
-      <Input.TextArea />
+      {data.text_type === 'textarea' ? <Input.TextArea /> : <Input />}
     </WrapperFormItem>
   }
   if (data.type === 'email') {

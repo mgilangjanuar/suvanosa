@@ -1,5 +1,5 @@
 import { DeleteOutlined, MenuOutlined, SyncOutlined } from '@ant-design/icons'
-import { Button, Card, Checkbox, Form, Input, Layout, notification, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
+import { Button, Card, Checkbox, Form, Input, Layout, notification, Popconfirm, Select, Space, Tag, Tooltip, Typography } from 'antd'
 import { useEffect, useState } from 'react'
 import { SortableElement, SortableHandle } from 'react-sortable-hoc'
 import { req } from '../../../../utils/Fetcher'
@@ -108,9 +108,21 @@ const SortableItem = SortableElement(({ value }: any) => {
       <Form.Item>
         <PopoverTutorial name={`form-${value.i}`} title="4/5 Form Details" content="Edit your label, description, and help text for your input." next="url" tutorialStates={value.tutorialStates}>
           <Layout.Content>
-            <Tag style={{ float: 'right' }}>
+            <Tag style={{ float: 'right', marginLeft: '20px', marginTop: '5px' }}>
               {value.form.getFieldValue('forms')?.[value.i]?.type}
             </Tag>
+            {value.form.getFieldValue('forms')?.[value.i]?.type === 'date' && <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'date_type']} fieldKey={[value.field.fieldKey, 'date_type']} key={[value.field.fieldKey, 'date_type']}>
+              <Select onBlur={() => update()}>
+                <Select.Option key="default" value="">Default</Select.Option>
+                <Select.Option key="range" value="range">Date range</Select.Option>
+              </Select>
+            </Form.Item>}
+            {value.form.getFieldValue('forms')?.[value.i]?.type === 'rich_text' && <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'text_type']} fieldKey={[value.field.fieldKey, 'text_type']} key={[value.field.fieldKey, 'text_type']}>
+              <Select onBlur={() => update()}>
+                <Select.Option key="default" value="">Default</Select.Option>
+                <Select.Option key="textarea" value="textarea">Textarea</Select.Option>
+              </Select>
+            </Form.Item>}
             <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']} key={[value.field.fieldKey, 'label']}>
               <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." style={{ fontSize: '16px' }} />
             </Form.Item>

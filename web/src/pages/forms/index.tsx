@@ -71,9 +71,6 @@ const Forms: FC = () => {
           <Typography.Paragraph>
             <Typography.Text strong>Thank you! Your response has already been sent.</Typography.Text> Have a good day, stay safe, and healthy wherever you are 😬
           </Typography.Paragraph>
-          <Typography.Paragraph style={{ textAlign: 'center', marginTop: '48px' }}>
-            <Button onClick={() => window.close()} icon={<CloseOutlined />}>Close</Button>
-          </Typography.Paragraph>
         </>}
       </Col>
     </Row>

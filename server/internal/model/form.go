@@ -12,6 +12,7 @@ type Form struct {
 	Label       string         `gorm:"notNull" json:"label"`
 	Type        string         `json:"type"`
 	DateType    string         `json:"date_type"`
+	TextType    string         `json:"text_type"`
 	Help        string         `json:"help"`
 	Description string         `json:"description"`
 	Order       int            `gorm:"default:0" json:"order"`
