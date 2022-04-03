@@ -1,4 +1,4 @@
-import { CheckCircleOutlined, CopyOutlined, DeleteOutlined, LinkOutlined, LoadingOutlined, TableOutlined } from '@ant-design/icons'
+import { CheckCircleOutlined, CopyOutlined, DatabaseOutlined, DeleteOutlined, LinkOutlined, LoadingOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Layout, message, notification, PageHeader, Popconfirm, Popover, Typography } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
 import clipboard from 'clipboardy'
@@ -6,13 +6,15 @@ import { FC, useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { req } from '../../../../utils/Fetcher'
 import { useRemoveDatabase } from '../hooks/useRemoveDatabase'
+import PopoverTutorial from './PopoverTutorial'
 
 interface Props {
   database?: any,
-  savingStates: [boolean, (value: boolean) => void]
+  savingStates: [boolean, (value: boolean) => void],
+  tutorialStates: [string | null, (value: string | null) => void]
 }
 
-const Header: FC<Props> = ({ database, savingStates }) => {
+const Header: FC<Props> = ({ database, savingStates, tutorialStates }) => {
   const [isSaving, setIsSaving] = savingStates
   const navigate = useNavigate()
   const params = useParams()
@@ -44,9 +46,11 @@ const Header: FC<Props> = ({ database, savingStates }) => {
   return <Layout.Content>
     <Form form={formDb}>
       <PageHeader style={{ padding: 0 }} title={
-        <Form.Item name="title" style={{ marginBottom: 0 }}>
-          <Input style={{ fontSize: '20px', marginBottom: 0, padding: 0 }} onBlur={() => update(formDb.getFieldsValue())} size="large" bordered={false} placeholder="Edit your survey name..." />
-        </Form.Item>
+        <PopoverTutorial name="title" title="1/4 Edit Title" content="Click to edit title of your survey." next="description" tutorialStates={tutorialStates}>
+          <Form.Item name="title" style={{ marginBottom: 0 }}>
+            <Input style={{ fontSize: '20px', marginBottom: 0, padding: 0 }} onBlur={() => update(formDb.getFieldsValue())} size="large" bordered={false} placeholder="Edit your survey name..." />
+          </Form.Item>
+        </PopoverTutorial>
       } onBack={() => navigate(-1)} breadcrumb={{ routes: [
         { path: '/dashboard/database', breadcrumbName: 'Database' },
         { path: '#', breadcrumbName: database?.title },
@@ -57,7 +61,7 @@ const Header: FC<Props> = ({ database, savingStates }) => {
         <Popconfirm title="Are you sure?" placement="bottom" onConfirm={() => remove(database?.id, () => navigate(-1))}>
           <Button size="small" loading={removeLoading} shape="round" danger type="text" icon={<DeleteOutlined />} />
         </Popconfirm>,
-        <Button size="small" type="text" shape="round" icon={<TableOutlined />} href={database?.real_object.url} target="_blank" />,
+        <Button size="small" type="text" shape="round" icon={<DatabaseOutlined />} href={database?.real_object.url} target="_blank" />,
         <Popover trigger={['click']} placement="bottom" title="Form URL" content={<Layout.Content>
           <Form.Item>
             <Input.Search
@@ -78,9 +82,11 @@ const Header: FC<Props> = ({ database, savingStates }) => {
           {isSaving ? <><LoadingOutlined /> Saving</> : <><CheckCircleOutlined /> Saved</>}
         </Typography.Paragraph>
       ]}>
-        <Form.Item name="description">
-          <Input.TextArea onBlur={() => update(formDb.getFieldsValue())} placeholder="Write the survey description here..." bordered={false} />
-        </Form.Item>
+        <PopoverTutorial name="description" title="2/4 Edit Description" content="Click to edit description." next="reorder-0" tutorialStates={tutorialStates}>
+          <Form.Item name="description">
+            <Input.TextArea onBlur={() => update(formDb.getFieldsValue())} placeholder="Write the survey description here..." bordered={false} />
+          </Form.Item>
+        </PopoverTutorial>
       </PageHeader>
     </Form>
   </Layout.Content>

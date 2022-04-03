@@ -1,8 +1,9 @@
 import { DeleteOutlined, MenuOutlined, SyncOutlined } from '@ant-design/icons'
 import { Button, Card, Checkbox, Form, Input, Layout, notification, Popconfirm, Space, Tag, Tooltip, Typography } from 'antd'
-import { useEffect, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { SortableElement, SortableHandle } from 'react-sortable-hoc'
 import { req } from '../../../../utils/Fetcher'
+import PopoverTutorial from './PopoverTutorial'
 
 const SortableItem = SortableElement(({ value }: any) => {
   const [syncLoading, setSyncLoading] = useState<boolean>()
@@ -105,41 +106,49 @@ const SortableItem = SortableElement(({ value }: any) => {
       bodyStyle={{ paddingBottom: 0 }}
       style={{ margin: '20px 0' }}>
       <Form.Item>
-        <Layout.Content>
-          <Tag style={{ float: 'right' }}>
-            {value.form.getFieldValue('forms')?.[value.i]?.type}
-          </Tag>
-          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']} key={[value.field.fieldKey, 'label']}>
-            <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." style={{ fontSize: '16px' }} />
-          </Form.Item>
-          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'description']} fieldKey={[value.field.fieldKey, 'description']} key={[value.field.fieldKey, 'description']}>
-            <Input onBlur={() => update()} bordered={false} placeholder="Write your description or leave it blank..." />
-          </Form.Item>
-          <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'help']} fieldKey={[value.field.fieldKey, 'help']} key={[value.field.fieldKey, 'help']}>
-            <Input onBlur={() => update()} bordered={false} placeholder="Write your help text or leave it blank..." />
-          </Form.Item>
-          <Form.Item valuePropName="checked" { ...fieldCol } {...value.field} name={[value.field.name, 'required']} fieldKey={[value.field.fieldKey, 'required']} key={[value.field.fieldKey, 'required']}>
-            <Checkbox onChange={({ target }) => {
-              setRequired(target.checked)
-              update({
-                ...value.form.getFieldValue('forms')?.[value.i],
-                required: target.checked
-              })
-            }} checked={required}>Required</Checkbox>
-          </Form.Item>
-        </Layout.Content>
+        <PopoverTutorial name={`form-${value.i}`} title="4/4 Form Details" content="Edit your label, description, and help text for your input." next="_done" tutorialStates={value.tutorialStates}>
+          <Layout.Content>
+            <Tag style={{ float: 'right' }}>
+              {value.form.getFieldValue('forms')?.[value.i]?.type}
+            </Tag>
+            <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'label']} fieldKey={[value.field.fieldKey, 'label']} key={[value.field.fieldKey, 'label']}>
+              <Input onBlur={() => update()} bordered={false} placeholder="Please input label..." style={{ fontSize: '16px' }} />
+            </Form.Item>
+            <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'description']} fieldKey={[value.field.fieldKey, 'description']} key={[value.field.fieldKey, 'description']}>
+              <Input onBlur={() => update()} bordered={false} placeholder="Write your description or leave it blank..." />
+            </Form.Item>
+            <Form.Item { ...fieldCol } {...value.field} name={[value.field.name, 'help']} fieldKey={[value.field.fieldKey, 'help']} key={[value.field.fieldKey, 'help']}>
+              <Input onBlur={() => update()} bordered={false} placeholder="Write your help text or leave it blank..." />
+            </Form.Item>
+            <Form.Item valuePropName="checked" { ...fieldCol } {...value.field} name={[value.field.name, 'required']} fieldKey={[value.field.fieldKey, 'required']} key={[value.field.fieldKey, 'required']}>
+              <Checkbox onChange={({ target }) => {
+                setRequired(target.checked)
+                update({
+                  ...value.form.getFieldValue('forms')?.[value.i],
+                  required: target.checked
+                })
+              }} checked={required}>Required</Checkbox>
+            </Form.Item>
+          </Layout.Content>
+        </PopoverTutorial>
       </Form.Item>
-    </Card> : <Card hoverable style={{ margin: '20px 0', position: 'relative' }} onClick={() => value.collapsible.setCollapsibleStates({ ...value.collapsible.collapsibleStates, [value.form.getFieldValue('forms')?.[value.i]?.id]: false })}>
-      <Card.Meta title={<>
-        <DragHandle /> {value.form.getFieldValue('forms')?.[value.i]?.label}
-        {value.form.getFieldValue('forms')?.[value.i]?.required && <small style={{ float: 'right' }}>
-          <Typography.Text type="secondary" italic> Required</Typography.Text>
-        </small>}
-      </>}
-      />
-    </Card>}
+    </Card> : <CollapsedCard value={value} />}
   </>
 })
+
+const CollapsedCard: FC<{ value: any }> = ({ value }) => {
+  return <Card hoverable style={{ margin: '20px 0', position: 'relative' }} onClick={() => value.collapsible.setCollapsibleStates({ ...value.collapsible.collapsibleStates, [value.form.getFieldValue('forms')?.[value.i]?.id]: false })}>
+    <Card.Meta title={<>
+      <PopoverTutorial name={`reorder-${value.i}`} title="3/4 Reorder Form" content="Hold and drag to sort the forms order." next="form-0" tutorialStates={value.tutorialStates}>
+        <DragHandle />
+      </PopoverTutorial> {value.form.getFieldValue('forms')?.[value.i]?.label}
+      {value.form.getFieldValue('forms')?.[value.i]?.required && <small style={{ float: 'right' }}>
+        <Typography.Text type="secondary" italic> Required</Typography.Text>
+      </small>}
+    </>}
+    />
+  </Card>
+}
 
 const DragHandle = SortableHandle(() => <Tooltip title="Hold &amp; drag to sort">
   <Button size="small" type="text"><MenuOutlined /></Button>

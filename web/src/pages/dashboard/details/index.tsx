@@ -1,5 +1,5 @@
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Form, Layout, notification } from 'antd'
+import { Button, Form, Input, Layout, notification } from 'antd'
 import { useForm } from 'antd/lib/form/Form'
 import { FC, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
@@ -18,6 +18,7 @@ const Details: FC = () => {
   const [collapsibleStates, setCollapsibleStates] = useState<{ [key: string]: boolean }>({})
   const [showAddModal, setShowAddModal] = useState<boolean>(false)
   const [isSaving, setIsSaving] = useState<boolean>(false)
+  const [tutorial, setTutorial] = useState<string | null>(localStorage.getItem('tutorial') || 'title')
 
   useEffect(() => {
     if (errorDb || errorForms) {
@@ -38,6 +39,12 @@ const Details: FC = () => {
       }), {}))
     }
   }, [forms])
+
+  useEffect(() => {
+    if (tutorial) {
+      localStorage.setItem('tutorial', tutorial)
+    }
+  }, [tutorial])
 
   const updateFormsOrder = async () => {
     const { forms } = form.getFieldsValue()
@@ -61,10 +68,11 @@ const Details: FC = () => {
   }
 
   return <>
-    <Header database={db?.database} savingStates={[isSaving, setIsSaving]} />
+    <Header database={db?.database} savingStates={[isSaving, setIsSaving]} tutorialStates={[tutorial, setTutorial]} />
 
     <Layout.Content style={{ marginTop: '40px' }}>
-      <Form form={form}>
+      <Form autoComplete="off" form={form}>
+        <Input type="hidden" autoComplete="false" />
         <Form.List name="forms">
           {(fields, { remove }) => <>
             <SortableList items={
@@ -74,6 +82,7 @@ const Details: FC = () => {
                 i,
                 form,
                 collapsible: { collapsibleStates, setCollapsibleStates },
+                tutorialStates: [tutorial, setTutorial],
                 onSaving: (val: boolean) => setIsSaving(val)
               }))
             } onSortEnd={({ oldIndex, newIndex }: any) => {
