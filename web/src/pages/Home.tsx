@@ -12,7 +12,7 @@ const Home: FC = () => {
           Survey engine powered with Notion.
         </Typography.Title>
         <Typography.Paragraph type="secondary">
-          Start to create beautiful surveys with Notion. What you have to do is create a database page in your Notion workspace, and voila! Your survey is ready to share with your audience.
+          Start to create beautiful surveys with Notion. What you have to do is create a table in your Notion workspace, and voila! Your survey is ready to share with your audience.
         </Typography.Paragraph>
         <Typography.Paragraph style={{ marginTop: '40px' }}>
           <Button size="large" type="primary" onClick={() => window.open(user ? '/dashboard' : url, '_self')}>
