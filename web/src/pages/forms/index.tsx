@@ -1,4 +1,4 @@
-import { ArrowRightOutlined, CloseOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined } from '@ant-design/icons'
 import { Button, Col, Divider, Form, Input, Layout, notification, PageHeader, Row, Typography } from 'antd'
 import { FC, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
