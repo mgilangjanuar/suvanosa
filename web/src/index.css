@@ -23,3 +23,11 @@ body {
   width: 100% !important;
   max-width: 480px;
 }
+
+.logo {
+  float: left;
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.2em;
+  padding-left: 16px;
+}
