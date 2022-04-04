@@ -139,6 +139,11 @@ Or, manual build with:
   run start
   ```
 
+## Daemonize Services
+
+ - Systemctl: https://stackoverflow.com/questions/58022141/pm2-like-process-management-solution-for-golang-applications
+ - PM2: https://pm2.keymetrics.io/
+
 ## License
 
 [MIT](./LICENSE.md)
