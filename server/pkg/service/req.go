@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func Req(method string, url string, body map[string]interface{}, headers map[string]string, responseObject interface{}) error {
+func Req[T any](method string, url string, body *map[string]interface{}, headers map[string]string, responseObject T) error {
 	var req *http.Request
 
 	if body != nil {

@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/base64"
+	"fmt"
 	"os"
 )
 
@@ -11,6 +12,13 @@ type Notion struct {
 		Username string
 		Password string
 	}
+}
+
+type NotionRequest[T any] struct {
+	Notion Notion
+	Method string
+	URL    string
+	Body   *map[string]interface{}
 }
 
 type NotionMeResponse struct {
@@ -98,38 +106,29 @@ type NotionSeachResponse struct {
 	Results    []NotionResultResponse `json:"results"`
 }
 
-func (n Notion) req(method string, url string, body map[string]interface{}, responseObject interface{}) error {
-	headers := map[string]string{
-		"Notion-Version": "2022-02-22",
-	}
-	if n.Token != "" {
-		headers["Authorization"] = "Bearer " + n.Token
-	}
-	if n.BasicAuth != nil {
-		headers["Authorization"] = "Basic " + base64.StdEncoding.EncodeToString([]byte(n.BasicAuth.Username+":"+n.BasicAuth.Password))
-	}
-	return Req(method, url, body, headers, responseObject)
-}
-
 func (n Notion) RequestToken(code string) (NotionTokenResponse, error) {
-	var responseObject NotionTokenResponse
 	body := map[string]interface{}{
 		"grant_type":   "authorization_code",
 		"redirect_uri": os.Getenv("NOTION_REDIRECT_URL"),
 		"code":         code,
 	}
-	err := n.req("POST", "https://api.notion.com/v1/oauth/token", body, &responseObject)
-	return responseObject, err
+	return NotionRequest[NotionTokenResponse]{
+		Notion: n,
+		Method: "POST",
+		URL:    "https://api.notion.com/v1/oauth/token",
+		Body:   &body,
+	}.req()
 }
 
 func (n Notion) GetMe() (NotionMeResponse, error) {
-	var responseObject NotionMeResponse
-	err := n.req("GET", "https://api.notion.com/v1/users/me", nil, &responseObject)
-	return responseObject, err
+	return NotionRequest[NotionMeResponse]{
+		Notion: n,
+		Method: "GET",
+		URL:    "https://api.notion.com/v1/users/me",
+	}.req()
 }
 
 func (n Notion) Search(query string) (NotionSeachResponse, error) {
-	var responseObject NotionSeachResponse
 	body := map[string]interface{}{
 		"query": query,
 		"sort": map[string]string{
@@ -137,24 +136,48 @@ func (n Notion) Search(query string) (NotionSeachResponse, error) {
 			"timestamp": "last_edited_time",
 		},
 	}
-	err := n.req("POST", "https://api.notion.com/v1/search", body, &responseObject)
-	return responseObject, err
+	return NotionRequest[NotionSeachResponse]{
+		Notion: n,
+		Method: "POST",
+		URL:    "https://api.notion.com/v1/search",
+		Body:   &body,
+	}.req()
 }
 
 func (n Notion) GetDatabase(id string) (NotionResultResponse, error) {
-	var responseObject NotionResultResponse
-	err := n.req("GET", "https://api.notion.com/v1/databases/"+id, nil, &responseObject)
-	return responseObject, err
+	return NotionRequest[NotionResultResponse]{
+		Notion: n,
+		Method: "GET",
+		URL:    fmt.Sprintf("https://api.notion.com/v1/databases/%s", id),
+	}.req()
 }
 
 func (n Notion) CreatePage(databaseID string, properties map[string]interface{}) (NotionResultResponse, error) {
-	var responseObject NotionResultResponse
 	body := map[string]interface{}{
 		"parent": map[string]string{
 			"database_id": databaseID,
 		},
 		"properties": properties,
 	}
-	err := n.req("POST", "https://api.notion.com/v1/pages", body, &responseObject)
-	return responseObject, err
+	return NotionRequest[NotionResultResponse]{
+		Notion: n,
+		Method: "POST",
+		URL:    "https://api.notion.com/v1/pages",
+		Body:   &body,
+	}.req()
+}
+
+func (r NotionRequest[T]) req() (T, error) {
+	headers := map[string]string{
+		"Notion-Version": "2022-02-22",
+	}
+	if r.Notion.Token != "" {
+		headers["Authorization"] = "Bearer " + r.Notion.Token
+	}
+	if r.Notion.BasicAuth != nil {
+		headers["Authorization"] = "Basic " + base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", r.Notion.BasicAuth.Username, r.Notion.BasicAuth.Password)))
+	}
+	var responseObject *T
+	err := Req(r.Method, r.URL, r.Body, headers, &responseObject)
+	return *responseObject, err
 }
