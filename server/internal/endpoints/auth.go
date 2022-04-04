@@ -166,9 +166,9 @@ func (a Auth) refreshToken(c *gin.Context) {
 }
 
 func (a Auth) logout(c *gin.Context) {
-	c.SetCookie("access_token", "", 0, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
-	c.SetCookie("expires_at", "", 0, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
-	c.SetCookie("refresh_token", "", 0, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
+	c.SetCookie("access_token", "", 0, "/", util.BASE_URL, strings.Contains(util.BASE_URL, "https"), true)
+	c.SetCookie("expires_at", "", 0, "/", util.BASE_URL, strings.Contains(util.BASE_URL, "https"), true)
+	c.SetCookie("refresh_token", "", 0, "/", util.BASE_URL, strings.Contains(util.BASE_URL, "https"), true)
 	c.JSON(http.StatusOK, gin.H{})
 }
 
@@ -220,7 +220,7 @@ func (a Auth) _getUserDataAndSetCookies(user model.User, c *gin.Context) (map[st
 		if k == "refresh_token" {
 			duration = int(util.REFRESH_TOKEN_EXPIRATION_TIME.Seconds())
 		}
-		c.SetCookie(k, v.(string), duration, "/", util.WEB_BASE_URL, strings.Contains(util.WEB_BASE_URL, "https"), true)
+		c.SetCookie(k, v.(string), duration, "/", util.BASE_URL, strings.Contains(util.BASE_URL, "https"), true)
 	}
 	return userData, nil
 }

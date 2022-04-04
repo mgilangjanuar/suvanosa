@@ -19,7 +19,7 @@ const Auth: FC = () => {
           .catch(() => {
             notification.error({ message: 'Whoops!', description: 'Something went wrong. Please reload and try again 🙏' })
           })
-      }, 3500)
+      }, 1000)
     }
   }, [searchParams])
 
