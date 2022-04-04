@@ -46,20 +46,25 @@ const Details: FC = () => {
     }
   }, [tutorial])
 
-  const updateFormsOrder = async () => {
-    const { forms } = form.getFieldsValue()
+  const updateFormsOrder = async (forms?: any[]) => {
+    forms = forms || form.getFieldValue('forms')
     setIsSaving(true)
-    await Promise.all(await forms.map(async (form: any, i: number) => {
-      if (form.order !== i) {
+    await Promise.all((forms || []).map(async (f: any, i: number) => {
+      if (f.order !== i) {
         try {
-          await req.patch(`/forms/${form.id}`, { form: {
+          await req.patch(`/forms/${f.id}`, { form: {
             order: i
           } })
+          form.setFieldsValue({
+            forms: form.getFieldValue('forms').map((f1: any) => {
+              return f.id === f1.id ? { ...f1, order: i } : f1
+            })
+          })
         } catch (error) {
           setIsSaving(false)
           notification.error({
             message: 'Error',
-            description: `Failed to save form: ${form.label}`
+            description: `Failed to save form: ${f.label}`
           })
         }
       }
@@ -86,10 +91,9 @@ const Details: FC = () => {
                 onSaving: (val: boolean) => setIsSaving(val)
               }))
             } onSortEnd={({ oldIndex, newIndex }: any) => {
-              form.setFieldsValue({
-                forms: arrayMove(form.getFieldValue('forms'), oldIndex, newIndex)
-              })
-              updateFormsOrder()
+              const forms = arrayMove(form.getFieldValue('forms'), oldIndex, newIndex)
+              form.setFieldsValue({ forms })
+              updateFormsOrder(forms)
             }} useDragHandle useWindowAsScrollContainer />
             <Form.Item wrapperCol={{ span: 24 }}>
               <Button size="large" type="dashed" onClick={() => setShowAddModal(true)} block icon={<PlusOutlined />}>
