@@ -1,6 +1,7 @@
 import { DatabaseOutlined, ShareAltOutlined } from '@ant-design/icons'
 import { Button, Col, Layout, Row, Typography } from 'antd'
 import { FC } from 'react'
+import { ReactComponent as Notion } from '../notion.svg'
 import { useLogin } from '../hooks/useLogin'
 
 const Home: FC = () => {
@@ -10,7 +11,7 @@ const Home: FC = () => {
     <Row style={{ textAlign: 'center' }}>
       <Col xxl={{ span: 8, offset: 8 }} xl={{ span: 10, offset: 7 }} lg={{ span: 12, offset: 6 }} md={{ span: 16, offset: 4 }} span={24}>
         <Typography.Title level={2}>
-          Survey engine powered with Notion.
+          Survey engine powered with <Notion style={{ width: '43px', height: 'auto', marginBottom: '-7px' }} /> Notion.
         </Typography.Title>
         <Typography.Paragraph type="secondary">
           Start to create beautiful surveys with Notion. What you have to do is create a table in your Notion workspace, and voila! Your survey is ready to share with your audience.

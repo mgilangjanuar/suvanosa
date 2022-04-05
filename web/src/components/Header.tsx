@@ -1,9 +1,9 @@
 import { MenuOutlined } from '@ant-design/icons'
-import { Button, Layout, Menu } from 'antd'
+import { Layout, Menu } from 'antd'
 import { FC } from 'react'
-import { Link } from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useLogin } from '../hooks/useLogin'
+import { ReactComponent as Notion } from '../notion.svg'
 import { req } from '../utils/Fetcher'
 
 const Header: FC = () => {
@@ -23,9 +23,15 @@ const Header: FC = () => {
     </div>
     <Menu overflowedIndicator={<MenuOutlined />} mode="horizontal" triggerSubMenuAction="click" theme="light" defaultSelectedKeys={[location.pathname.replace(/^\//, '')]}
       style={{ background: '#ffffff', position: 'relative', display: 'flex', justifyContent: 'right' }}>
-      <Menu.Item onClick={() => navigate('/')} key="">Home</Menu.Item>
-      <Menu.Item key="action-right" style={{ float: 'right' }}>
-        {user ? <Button danger onClick={logout}>Logout</Button> : <Button href={url}>Login</Button> }
+      <Menu.Item
+        onClick={() => navigate(user ? '/dashboard' : '/')}
+        key={user ? 'dashboard' : ''}>
+        {user ? 'Dashboard' : 'Home'}
+      </Menu.Item>
+      <Menu.Item key="action-right" style={{ float: 'right' }} onClick={user ? logout : () => window.open(url, '_self')} danger={user}>
+        {user ? 'Logout' : <>
+          <Notion style={{ width: '25px', height: 'auto', marginBottom: '-6px' }} /> Login with Notion
+        </> }
       </Menu.Item>
     </Menu>
   </Layout.Header>
