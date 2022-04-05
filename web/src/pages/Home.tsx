@@ -3,6 +3,7 @@ import { Button, Col, Layout, Row, Typography } from 'antd'
 import { FC } from 'react'
 import { ReactComponent as Notion } from '../notion.svg'
 import { useLogin } from '../hooks/useLogin'
+import GitHubButton from 'react-github-btn'
 
 const Home: FC = () => {
   const { user, url } = useLogin()
@@ -20,6 +21,9 @@ const Home: FC = () => {
           <Button size="large" type="primary" onClick={() => window.open(user ? '/dashboard' : url, '_self')}>
             {user ? 'Go to Dashboard' : 'Create a Survey'}
           </Button>
+        </Typography.Paragraph>
+        <Typography.Paragraph>
+          <GitHubButton href="https://github.com/mgilangjanuar/suvanosa" data-show-count="true" aria-label="Star mgilangjanuar/suvanosa on GitHub">Star</GitHubButton>
         </Typography.Paragraph>
       </Col>
     </Row>
